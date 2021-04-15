@@ -1,10 +1,4 @@
-using Catalyst, ModelingToolkit
-using MacroTools
-const MT = ModelingToolkit
-
 import AbstractAlgebra
-using RuntimeGeneratedFunctions
-RuntimeGeneratedFunctions.init(@__MODULE__)
 
 netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
 
@@ -160,9 +154,9 @@ function build_rhs_header(sys::FSPSystem)::Expr
     cons_names = Expr(:tuple, sys.cons_syms...)
     
     quote 
-        (cons::AbstractVector{Int64}, ps::AbstractVector{Float64}) = p
-        $(cons_names) = cons
+        (ps::AbstractVector{Float64}, cons::AbstractVector{Int64}) = p
         $(param_names) = ps
+        $(cons_names) = cons
     end
 end
 
@@ -256,10 +250,14 @@ function build_rhs(sys::FSPSystem; expression::Bool=true, jac::Bool=false, offse
 end
 
 """
-    build_ode_func(sys)
+    build_ode_func(sys::FSPSystem)
+
+    Return an ODEFunction defining the right-hand side of the CME.
 
     Combines the RHS func and its Jacobian to define an ODEFunction for 
     use with DifferentialEquations.
+
+    See also: [`build_ode_problem`](@ref)
 """
 function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
     rhs = build_rhs(sys, expression=false, jac=false, offset=offset)
@@ -269,13 +267,14 @@ function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
 end
 
 """
-    build_ode_problem(sys, u0, tmax, p)
+    build_ode_problem(sys::FSPSystem, u0::AbstractArray, t, p)
 
-    Returns an ODEProblem for use in DifferentialEquations. Takes
-    initial values for the reduced species.
+    Return an ODEProblem for use in DifferentialEquations. 
+
+    `u0` is a multidimensional array denoting initial values for the reduced species.
 """
-function build_ode_prob(sys::FSPSystem, u0::AbstractArray, tmax::Float64, p)::ODEProblem
+function build_ode_prob(sys::FSPSystem, u0::AbstractArray, tmax::Float64, ps, cons::AbstractVector{Int64}=Int64[])::ODEProblem
     ode_func = build_ode_func(sys, offset=firstindex(u0, 1))
     
-    ODEProblem(ode_func, u0, tmax, p)
+    ODEProblem(ode_func, u0, tmax, (ps, cons))
 end

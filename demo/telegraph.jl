@@ -1,5 +1,4 @@
-include("../fsp.jl")
-
+using FSP
 using DifferentialEquations
 using PyPlot
 
@@ -17,7 +16,7 @@ sys = FSPSystem(rs)
 cons = get_conserved_quantities([1,0,0], sys.cons_laws)
 
 # Parameters for our system
-ps = [ 10.0, 0.25, 0.1, 1.0 ]
+ps = [ 15.0, 0.25, 0.15, 1.0 ]
 
 # Initial values
 # Since D_on + D_off = const. we do not have to model the two
@@ -32,7 +31,7 @@ ps = [ 10.0, 0.25, 0.1, 1.0 ]
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = build_ode_prob(sys, u0, 10.0, (cons, ps))
+prob = build_ode_prob(sys, u0, 10.0, ps, cons)
 
 sol = solve(prob, Vern7(), dense=false, save_everystep=false, atol=1e-6)
 
