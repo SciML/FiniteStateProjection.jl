@@ -225,7 +225,7 @@ end
 
 function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
     rhs = build_rhs(sys, expression=false, jac=false, offset=offset)
-    rhs_jac = build_rhs(sys, expression=false, jac=false, offset=offset)
+    rhs_jac = build_rhs(sys, expression=false, jac=true, offset=offset)
     
     ODEFunction{true}(rhs, jac=rhs_jac)
 end
