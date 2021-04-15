@@ -3,7 +3,6 @@ using MacroTools
 const MT = ModelingToolkit
 
 import AbstractAlgebra
-using OffsetArrays
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
@@ -131,6 +130,8 @@ end
     build_ratefunc_exprs(sys)::Vector
 
     Return the rate functions converted to Julia expressions in the reduced variables.
+    We allow arbitrary offsets to deal with Julia's one-based indexing. Using
+    OffsetArrays (optional) is more natural here.
 """
 function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
     symbols = states(sys.rs)
@@ -148,6 +149,12 @@ function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
     return ret
 end
 
+"""
+    build_rhs_header(sys)::Expr
+
+    Return initialisation code for the RHS function. Unpacks 
+    conserved quantities and parameters.
+"""
 function build_rhs_header(sys::FSPSystem)::Expr
     param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
     cons_names = Expr(:tuple, sys.cons_syms...)
@@ -159,6 +166,14 @@ function build_rhs_header(sys::FSPSystem)::Expr
     end
 end
 
+"""
+    build_rhs_firstpass(sys, rfs)::Expr
+
+    Return code for the first pass of the RHS function. Goes through
+    all reactions and computes the negative part of the CME (probability
+    flowing out of states). This is a simple array traversal and can be
+    done in one go for all reactions.
+"""
 function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     # The CME is linear in u; computing the Jacobian is equivalent to
     # dropping the references to u
@@ -180,6 +195,15 @@ function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=fals
     end
 end
 
+"""
+    build_rhs_secondpass(sys, rfs)::Expr
+
+    Return code for the second pass of the RHS function. Goes through
+    all reactions and computes the positive part of the CME (probability
+    flowing into states). This requires accessing du and u at different
+    locations depending on the net stoichiometries. In order to reduce 
+    random memory access reactions are processed one by one.
+"""
 function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     S = netstoichmat(sys.rs)
     S = S[:,reduced_species(sys)]
@@ -202,6 +226,14 @@ function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=fal
     return ret
 end
 
+"""
+    build_rhs(sys)
+
+    Builds the RHS function f(du,u,p,t) that defines the CME, for use in
+    the ODE solver. If `expression` is true, returns an expression, else
+    compiles the function. If `jac` is true, returns the Jacobian function
+    instead (I haven't actually tested this).
+"""
 function build_rhs(sys::FSPSystem; expression::Bool=true, jac::Bool=false, offset=0) 
     rfs = build_ratefuncs(sys, offset=offset)
     header = build_rhs_header(sys)
@@ -223,6 +255,12 @@ function build_rhs(sys::FSPSystem; expression::Bool=true, jac::Bool=false, offse
     end
 end
 
+"""
+    build_ode_func(sys)
+
+    Combines the RHS func and its Jacobian to define an ODEFunction for 
+    use with DifferentialEquations.
+"""
 function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
     rhs = build_rhs(sys, expression=false, jac=false, offset=offset)
     rhs_jac = build_rhs(sys, expression=false, jac=true, offset=offset)
@@ -230,8 +268,14 @@ function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
     ODEFunction{true}(rhs, jac=rhs_jac)
 end
 
-function build_ode_prob(sys::FSPSystem, u0::AbstractArray, tmax::Float64, ps)::ODEProblem
+"""
+    build_ode_problem(sys, u0, tmax, p)
+
+    Returns an ODEProblem for use in DifferentialEquations. Takes
+    initial values for the reduced species.
+"""
+function build_ode_prob(sys::FSPSystem, u0::AbstractArray, tmax::Float64, p)::ODEProblem
     ode_func = build_ode_func(sys, offset=firstindex(u0, 1))
     
-    ODEProblem(ode_func, u0, tmax, ps)
+    ODEProblem(ode_func, u0, tmax, p)
 end
