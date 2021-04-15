@@ -132,17 +132,17 @@ end
 
     Return the rate functions converted to Julia expressions in the reduced variables.
 """
-function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector{Expr}
+function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
     symbols = states(sys.rs)
     subs_dict = get_subs_dict(sys)
     
-    ret = Expr[]
+    ret = []
     idx_subs = Dict(symbols[spec] => Term(:(Base.getindex), (state_sym, i)) - offset for (i, spec) in enumerate(reduced_species(sys)))
     for reac in sys.rs.eqs
         rate_sub = substitute(jumpratelaw(reac), subs_dict)
-        ex = substitute(rate_sub, idx_subs)
+        ex = toexpr(substitute(rate_sub, idx_subs))
         
-        push!(ret, toexpr(ex))
+        push!(ret, ex)
     end
     
     return ret
@@ -159,7 +159,7 @@ function build_rhs_header(sys::FSPSystem)::Expr
     end
 end
 
-function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector{Expr}; jac::Bool=false)::Expr
+function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     # The CME is linear in u; computing the Jacobian is equivalent to
     # dropping the references to u
     jacornot = jac ? 1 : (:(u[idx_in]))
@@ -180,7 +180,7 @@ function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector{Expr}; jac::Boo
     end
 end
 
-function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector{Expr}; jac::Bool=false)::Expr
+function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     S = netstoichmat(sys.rs)
     S = S[:,reduced_species(sys)]
     
