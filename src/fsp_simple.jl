@@ -3,9 +3,9 @@ import AbstractAlgebra
 netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
 
 """ 
-    shifted_indices(arr, shift)::CartesianIndices
+    shifted_indices(arr, shift::CartesianIndex)::CartesianIndices
 
-Returns all Cartesian indices I such that I and I .+ shift are in arr
+Returns all Cartesian indices `I` such that `I` and `I .+ shift` are in `arr`
 """
 function shifted_indices(arr::AbstractArray{T,N}, shift::CartesianIndex{N})::CartesianIndices{N, NTuple{N, UnitRange{Int}}} where {T,N}
     ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]), 
@@ -15,14 +15,12 @@ function shifted_indices(arr::AbstractArray{T,N}, shift::CartesianIndex{N})::Car
     CartesianIndices(ranges)
 end
 
-##
-
 """ 
-    get_conservation_laws(netstoichmat)::Matrix
+    get_conservation_laws(netstoichmat::AbstractMatrix{Int})::Matrix{Int}
 
-    Given the net stoichiometry matrix of a reaction system, computes a matrix
-    of conservation laws. Each row contains the stoichiometric coefficients
-    of a different conserved quantity.
+Given the net stoichiometry matrix of a reaction system, computes a matrix
+of conservation laws. Each row contains the stoichiometric coefficients
+of a different conserved quantity.
 """
 function get_conservation_laws(nsm::AbstractMatrix{Int})::Matrix{Int}
     n_reac, n_spec = size(nsm)
@@ -42,14 +40,12 @@ function get_conservation_laws(nsm::AbstractMatrix{Int})::Matrix{Int}
     return Matrix(U[:,n:end]')
 end
 
-get_conserved_quantities(state::AbstractVector{Int}, cons_laws::AbstractMatrix{Int})::AbstractVector{Int} = cons_laws * state
-
 """ 
     get_elided_species(cons_laws)::Vector
 
-    Returns a list of species [ s_1, ... ] which can be removed from the reaction system
-    description using the provided matrix of conservation laws. It is important that this
-    function is fully deterministic (for now, otherwise bugs might occur)
+Returns a list of species ``[ s_1, ... ]`` which can be removed from the reaction system
+description using the provided matrix of conservation laws. It is important that this
+function is fully deterministic (for now, otherwise bugs might occur)
 """
 function get_elided_species(cons_laws::AbstractMatrix{Int})::Vector{Int}
     n_cons, n_spec = size(cons_laws)
@@ -67,7 +63,6 @@ function get_elided_species(cons_laws::AbstractMatrix{Int})::Vector{Int}
     return ret
 end
 
-
 struct FSPSystem
     rs::ReactionSystem
     cons_laws::Matrix{Int}
@@ -75,7 +70,30 @@ struct FSPSystem
     cons_syms::Vector{Symbol}
 end
 
+"""
+    get_conserved_quantities(state, sys::FSPSystem)
+
+Compute conserved quantities for the system at the given state.
+"""
+get_conserved_quantities(state::AbstractVector{Int}, sys::FSPSystem)::AbstractVector{Int} = 
+    sys.cons_laws * state
+
+"""
+    reduced_species(sys::FSPSystem)
+
+Return indices of reduced species for the reaction system.
+
+See also: [`elided_species`](@ref)
+"""
 reduced_species(sys::FSPSystem) = sys.specs_sep[1:size(sys.cons_laws,2) - size(sys.cons_laws,1)]
+
+"""
+    elided_species(sys::FSPSystem)
+
+Return indices of elided (removed) species for the reaction system.
+
+See also: [`reduced_species`](@ref)
+"""
 elided_species(sys::FSPSystem) = isempty(sys.cons_laws) ? [] : sys.specs_sep[end-size(sys.cons_laws,1)+1,end]
 
 function FSPSystem(rs::ReactionSystem)
@@ -97,9 +115,11 @@ end
 """ 
     get_subs_dict(sys)::Dict
 
-    Replaces the symbols A(t), B(t), ... of elided species by
-    N1(t) - X(t) - Y(t), N2(t) - U(t) - V(t), ..., where Ni(t)
-    are the conserved quantities of the system.
+Replaces the symbols ``A(t)``, ``B(t)``, ... of elided species by
+``N_1(t) - X(t) - Y(t)``, ``N_2(t) - U(t) - V(t)``, ..., where ``N_i(t)``
+are the conserved quantities of the system.
+
+See also: [`build_ratefuncs`](@ref)
 """
 function get_subs_dict(sys::FSPSystem)::Dict{Any,Any}
     ret = Dict()
@@ -121,11 +141,13 @@ function get_subs_dict(sys::FSPSystem)::Dict{Any,Any}
 end
 
 """ 
-    build_ratefunc_exprs(sys)::Vector
+    build_ratefuncs(sys::FSPSystem)::Vector
 
-    Return the rate functions converted to Julia expressions in the reduced variables.
-    We allow arbitrary offsets to deal with Julia's one-based indexing. Using
-    OffsetArrays (optional) is more natural here.
+Return the rate functions converted to Julia expressions in the reduced variables.
+We allow arbitrary offsets to deal with Julia's one-based indexing. Using
+`OffsetArrays` (optional) is more natural here.
+
+See also: [`build_rhs`](@ref)
 """
 function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
     symbols = states(sys.rs)
@@ -144,10 +166,12 @@ function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
 end
 
 """
-    build_rhs_header(sys)::Expr
+    build_rhs_header(sys::FSPSystem)::Expr
 
-    Return initialisation code for the RHS function. Unpacks 
-    conserved quantities and parameters.
+Return initialisation code for the RHS function. Unpacks 
+conserved quantities and parameters.
+
+See also: [`build_rhs`](@ref)
 """
 function build_rhs_header(sys::FSPSystem)::Expr
     param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
@@ -161,12 +185,14 @@ function build_rhs_header(sys::FSPSystem)::Expr
 end
 
 """
-    build_rhs_firstpass(sys, rfs)::Expr
+    build_rhs_firstpass(sys::FSPSystem, rfs)::Expr
 
-    Return code for the first pass of the RHS function. Goes through
-    all reactions and computes the negative part of the CME (probability
-    flowing out of states). This is a simple array traversal and can be
-    done in one go for all reactions.
+Return code for the first pass of the RHS function. Goes through
+all reactions and computes the negative part of the CME (probability
+flowing out of states). This is a simple array traversal and can be
+done in one go for all reactions.
+
+See also: [`build_rhs`](@ref)
 """
 function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     # The CME is linear in u; computing the Jacobian is equivalent to
@@ -190,13 +216,15 @@ function build_rhs_firstpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=fals
 end
 
 """
-    build_rhs_secondpass(sys, rfs)::Expr
+    build_rhs_secondpass(sys::FSPSystem, rfs)::Expr
 
-    Return code for the second pass of the RHS function. Goes through
-    all reactions and computes the positive part of the CME (probability
-    flowing into states). This requires accessing du and u at different
-    locations depending on the net stoichiometries. In order to reduce 
-    random memory access reactions are processed one by one.
+Return code for the second pass of the RHS function. Goes through
+all reactions and computes the positive part of the CME (probability
+flowing into states). This requires accessing `du` and `u` at different
+locations depending on the net stoichiometries. In order to reduce 
+random memory access reactions are processed one by one.
+
+See also: [`build_rhs`](@ref)
 """
 function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=false)::Expr
     S = netstoichmat(sys.rs)
@@ -221,12 +249,12 @@ function build_rhs_secondpass(sys::FSPSystem, rfs::AbstractVector; jac::Bool=fal
 end
 
 """
-    build_rhs(sys)
+    build_rhs(sys::FSPSystem)
 
-    Builds the RHS function f(du,u,p,t) that defines the CME, for use in
-    the ODE solver. If `expression` is true, returns an expression, else
-    compiles the function. If `jac` is true, returns the Jacobian function
-    instead (I haven't actually tested this).
+Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME, 
+for use in the ODE solver. If `expression` is true, returns an expression, else
+compiles the function. If `jac` is true, returns the Jacobian function
+instead (I haven't actually tested this).
 """
 function build_rhs(sys::FSPSystem; expression::Bool=true, jac::Bool=false, offset=0) 
     rfs = build_ratefuncs(sys, offset=offset)
@@ -252,12 +280,12 @@ end
 """
     build_ode_func(sys::FSPSystem)
 
-    Return an ODEFunction defining the right-hand side of the CME.
+Return an ODEFunction defining the right-hand side of the CME.
 
-    Combines the RHS func and its Jacobian to define an ODEFunction for 
-    use with DifferentialEquations.
+Combines the RHS func and its Jacobian to define an `ODEFunction` for 
+use with `DifferentialEquations`.
 
-    See also: [`build_ode_problem`](@ref)
+See also: [`build_ode_prob`](@ref)
 """
 function build_ode_func(sys::FSPSystem; offset=0)::ODEFunction
     rhs = build_rhs(sys, expression=false, jac=false, offset=offset)
@@ -269,9 +297,12 @@ end
 """
     build_ode_problem(sys::FSPSystem, u0::AbstractArray, t, p)
 
-    Return an ODEProblem for use in DifferentialEquations. 
+Return an `ODEProblem` for use in `DifferentialEquations. 
 
-    `u0` is a multidimensional array denoting initial values for the reduced species.
+`u0` is a multidimensional array denoting initial values for the reduced species.
+FSP.jl automatically reduces the dimensionality of the ODE system where possible
+and elides species that can be expressed in terms of other species using conservation
+laws. The reduced species for a given system can be found with [`reduced_species`].
 """
 function build_ode_prob(sys::FSPSystem, u0::AbstractArray, tmax::Float64, ps, cons::AbstractVector{Int64}=Int64[])::ODEProblem
     ode_func = build_ode_func(sys, offset=firstindex(u0, 1))

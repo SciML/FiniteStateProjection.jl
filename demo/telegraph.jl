@@ -5,21 +5,21 @@ using PyPlot
 @parameters r1 r2 r3 r4
 
 rs = @reaction_network begin
-    r1, D_on --> D_on + M
-    (r2, r3), D_on <--> D_off
+    r1, G_on --> G_on + M
+    (r2, r3), G_on <--> G_off
     r4, M --> 0
 end r1 r2 r3 r4
 
 sys = FSPSystem(rs)
 
-# There is one conserved quantity: D_on + D_off
-cons = get_conserved_quantities([1,0,0], sys.cons_laws)
+# There is one conserved quantity: G_on + G_off
+cons = get_conserved_quantities([1,0,0], sys)
 
 # Parameters for our system
 ps = [ 15.0, 0.25, 0.15, 1.0 ]
 
 # Initial values
-# Since D_on + D_off = const. we do not have to model the two
+# Since G_on + G_off = const. we do not have to model the two
 # separately. Use reduced_species(sys) to get the list of 
 # species we actually have to model:
 # 
