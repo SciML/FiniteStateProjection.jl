@@ -9,9 +9,10 @@ using MacroTools
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
-export FSPSystem, AbstractIndexHandler, NaiveIndexHandler,
+export FSPSystem, AbstractIndexHandler, NaiveIndexHandler, DefaultIndexHandler,
        conservedquantities, 
-       pairedindices,
+       pairedindices, singleindices,
+       reducedspecies, elidedspecies,
        build_rhs, build_ode_func, build_ode_prob #reduced_species, elided_species, build_rhs, build_ode_func, build_ode_prob
 
 include("fspsystem.jl")

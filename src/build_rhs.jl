@@ -10,22 +10,9 @@ We allow arbitrary offsets to deal with Julia's one-based indexing. Using
 See also: [`build_rhs`](@ref)
 """
 function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Vector
-    #symbols = states(sys.rs)
     substitutions = getsubstitutions(idxhandler, sys, state_sym=state_sym)
     
     return [ toexpr(substitute(jumpratelaw(reac), substitutions)) for reac in sys.rs.eqs ]
-    
-    # Needs to be implemented!
-    #idx_subs = Dict(symbols[spec] => Term(Base.getindex, (state_sym, i)) - offset for (i, spec) in enumerate(reduced_species(sys)))
-    #for reac in sys.rs.eqs
-        #rate_sub = substitute(jumpratelaw(reac), subs_dict)
-        #ex = toexpr(substitute(rate_sub, idx_subs))
-    #    ex = toexpr(substitute(jumpratelaw(reac), subs))
-        
-    #    push!(ret, ex)
-    #end
-    
-    #return ret
 end
 
 function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
@@ -72,7 +59,7 @@ function build_rhs_firstpass(idxhandler::AbstractIndexHandler, sys::FSPSystem, r
     other_lines = (:(du[idx_in] -= u[idx_in] * $(rf)) for rf in rfs[2:end])
     
     quote
-        for idx_in in CartesianIndices(u)
+        for idx_in in singleindices($(idxhandler), u)
             $first_line
             $(other_lines...)
         end
@@ -117,7 +104,7 @@ for use in the ODE solver. If `expression` is true, returns an expression, else
 compiles the function. If `jac` is true, returns the Jacobian function
 instead (I haven't actually tested this).
 """
-function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression::Bool=true) 
+function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression::Bool=true, striplines::Bool=true) 
     rfs = build_ratefuncs(idxhandler, sys, state_sym=:idx_in)
     header = build_rhs_header(idxhandler, sys)
 
@@ -127,9 +114,11 @@ function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression:
     args = Expr(:tuple, :du, :u, :p, :t)
     body = Expr(:block, header, first_pass, second_pass)
     
-    ex = Expr(:function, args, body) |> MacroTools.striplines |> 
-                                        MacroTools.flatten |> 
-                                        MacroTools.alias_gensyms
+    ex = Expr(:function, args, body) 
+    
+    striplines && (ex = MacroTools.striplines(ex))
+    
+    ex = ex |> MacroTools.flatten |> MacroTools.prettify
     
     if expression
         return ex
@@ -149,7 +138,7 @@ use with `DifferentialEquations`.
 See also: [`build_ode_prob`](@ref)
 """
 function build_ode_func(idxhandler::AbstractIndexHandler, sys::FSPSystem)::ODEFunction
-    rhs = build_rhs(idxhandler, sys, expression=false)
+    rhs = build_rhs(idxhandler, sys, expression=false, striplines=false)
     
     ODEFunction{true}(rhs)
 end

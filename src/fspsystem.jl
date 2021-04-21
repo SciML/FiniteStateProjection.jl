@@ -13,6 +13,7 @@ end
 
 """ 
     conservationlaws(netstoichmat::AbstractMatrix{Int})::Matrix{Int}
+    conservationlaws(sys::FSPSystem)::Matrix{Int}
 
 Given the net stoichiometry matrix of a reaction system, computes a matrix
 of conservation laws. Each row contains the stoichiometric coefficients
@@ -37,18 +38,13 @@ function conservationlaws(nsm::AbstractMatrix{Int})::Matrix{Int}
     
     # If all coefficients for a conservation law are negative
     # we might as well flip them to become positive
-    for i in 1:size(ret,2)
-        all(ret[i,:i] .<= 0) && ret[i,:] .*= -1
+    for i in 1:size(ret,1)
+        all(ret[i,:] .<= 0) && (ret[i,:] .*= -1)
     end
     
     ret
 end
 
-"""
-    conservationlaws(sys::FSPSystem)::Matrix{Int}
-
-Returns the matrix of conservation laws.
-"""
 conservationlaws(sys::FSPSystem) = sys.cons_laws
 
 """
