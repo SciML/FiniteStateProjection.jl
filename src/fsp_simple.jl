@@ -154,7 +154,7 @@ function build_ratefuncs(sys::FSPSystem; state_sym=:idx_in, offset=0)::Vector
     subs_dict = get_subs_dict(sys)
     
     ret = []
-    idx_subs = Dict(symbols[spec] => Term(:(Base.getindex), (state_sym, i)) - offset for (i, spec) in enumerate(reduced_species(sys)))
+    idx_subs = Dict(symbols[spec] => Term(Base.getindex, (state_sym, i)) - offset for (i, spec) in enumerate(reduced_species(sys)))
     for reac in sys.rs.eqs
         rate_sub = substitute(jumpratelaw(reac), subs_dict)
         ex = toexpr(substitute(rate_sub, idx_subs))
