@@ -2,6 +2,8 @@ using FSP
 using DifferentialEquations
 using PyPlot
 
+##
+
 @parameters r1 r2 r3 r4
 
 rs = @reaction_network begin
@@ -10,10 +12,12 @@ rs = @reaction_network begin
     r4, M --> 0
 end r1 r2 r3 r4
 
+##
+
 sys = FSPSystem(rs)
 
 # There is one conserved quantity: G_on + G_off
-cons = get_conserved_quantities([1,0,0], sys)
+cons = conservedquantities([1,0,0], sys)
 
 # Parameters for our system
 ps = [ 15.0, 0.25, 0.15, 1.0 ]
@@ -31,9 +35,15 @@ ps = [ 15.0, 0.25, 0.15, 1.0 ]
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = build_ode_prob(sys, u0, 10.0, ps, cons)
+##
+
+prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
+
+##
 
 sol = solve(prob, Vern7(), dense=false, save_everystep=false, atol=1e-6)
+
+##
 
 plt.suptitle(L"Distribution at $t = 10$")
 plt.bar(0:49, sol.u[end][1,:] + sol.u[end][2,:], width=1);
