@@ -2,6 +2,16 @@ import AbstractAlgebra
 
 netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
 
+""" 
+    struct FSPSystem
+        rs::ReactionSystem
+        cons_laws::Matrix{Int}
+end
+
+Thin wrapper around `ReactionSystem` for use with this package.
+
+Constructor: `FSPSystem(rs::ReactionSystem)`
+"""
 struct FSPSystem
     rs::ReactionSystem
     cons_laws::Matrix{Int}

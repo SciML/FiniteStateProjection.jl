@@ -1,13 +1,21 @@
+""" 
+    getsubstitutions(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Dict
+
+Construct the map `speciesname => expr` that gives the species abundances
+in terms of the state variable `state_sym`. See [`NaiveIndexHandler`](@ref)
+for the default implementation.
+
+See also: [`build_ratefuncs`](@ref), [`build_rhs`](@ref)
+"""
 function getsubstitutions end
 
 """ 
     build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Vector
 
-Return the rate functions converted to Julia expressions in the reduced variables.
-We allow arbitrary offsets to deal with Julia's one-based indexing. Using
-`OffsetArrays` (optional) is more natural here.
+Return the rate functions converted to Julia expressions in the state variable 
+`state_sym`. Abundances of the species are computed using `getsubstitutions`.
 
-See also: [`build_rhs`](@ref)
+See also: [`getsubstitutions`](@ref), [`build_rhs`](@ref)
 """
 function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Vector
     substitutions = getsubstitutions(idxhandler, sys, state_sym=state_sym)
@@ -15,32 +23,41 @@ function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state
     return [ toexpr(substitute(jumpratelaw(reac), substitutions)) for reac in sys.rs.eqs ]
 end
 
+"""
+    unpackparams(sys::FSPSystem, psym::Symbol)
+
+Returns code unpacking the parameters of the system from the symbol
+`psym` in the form `(p1, p2, ...) = psym`. This should be called in
+all overloads of [`build_rhs_header`](@ref). It is assumed that
+the variable `psym` is an `AbstractVector{Float64}`.
+
+See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
+"""
 function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
     param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
      
     quote 
-        $(param_names) = ps
+        $(param_names) = ps::AbstractVector{Float64}
     end
 end
 
 """
     build_rhs_header(idxhandler::AbstractIndexHandler, sys::FSPSystem)::Expr
 
-Return initialisation code for the RHS function. Unpacks parameters.
+Return initialisation code for the RHS function, unpacking the parameters
+`p` supplied by `DifferentialEquations`. The default implementation
+just unpacks parameters from `p`.
 
-See also: [`build_rhs`](@ref)
+See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
 function build_rhs_header(::AbstractIndexHandler, sys::FSPSystem)::Expr
-    #cons_names = Expr(:tuple, sys.cons_syms...)
-    
-    # Needs modified
     quote 
-        #(ps::AbstractVector{Float64}, cons::AbstractVector{Int64}) = p
         ps::AbstractVector{Float64} = p
         $(unpackparams(sys, :ps))
-        #$(cons_names) = cons
     end
 end
+
+##
 
 """
     build_rhs_firstpass(sys::FSPSystem, rfs)::Expr
@@ -65,6 +82,8 @@ function build_rhs_firstpass(idxhandler::AbstractIndexHandler, sys::FSPSystem, r
         end
     end
 end
+
+##
 
 """
     build_rhs_secondpass(sys::FSPSystem, rfs)::Expr
@@ -96,15 +115,16 @@ function build_rhs_secondpass(idxhandler::AbstractIndexHandler, sys::FSPSystem, 
     return ret
 end
 
+##
+
 """
     build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem)
 
 Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME, 
 for use in the ODE solver. If `expression` is true, returns an expression, else
-compiles the function. If `jac` is true, returns the Jacobian function
-instead (I haven't actually tested this).
+compiles the function. 
 """
-function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression::Bool=true, striplines::Bool=true) 
+function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression::Bool=true, striplines::Bool=expression) 
     rfs = build_ratefuncs(idxhandler, sys, state_sym=:idx_in)
     header = build_rhs_header(idxhandler, sys)
 
@@ -127,34 +147,26 @@ function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression:
     end
 end
 
-"""
-    build_ode_func(sys::FSPSystem)
+##
 
-Return an ODEFunction defining the right-hand side of the CME.
+"""
+    convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem)
+
+Return an `ODEFunction` defining the right-hand side of the CME.
 
 Combines the RHS func and its Jacobian to define an `ODEFunction` for 
 use with `DifferentialEquations`.
-
-See also: [`build_ode_prob`](@ref)
 """
-function build_ode_func(idxhandler::AbstractIndexHandler, sys::FSPSystem)::ODEFunction
+function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem)::ODEFunction
     rhs = build_rhs(idxhandler, sys, expression=false, striplines=false)
-    
     ODEFunction{true}(rhs)
 end
 
 """
-    build_ode_problem(sys::FSPSystem, u0::AbstractArray, t, p)
+    convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p)
 
 Return an `ODEProblem` for use in `DifferentialEquations. 
-
-`u0` is a multidimensional array denoting initial values for the reduced species.
-FSP.jl automatically reduces the dimensionality of the ODE system where possible
-and elides species that can be expressed in terms of other species using conservation
-laws. The reduced species for a given system can be found with [`reduced_species`].
 """
-function build_ode_prob(idxhandler::AbstractIndexHandler, sys::FSPSystem, u0::AbstractArray, tmax::Float64, p)::ODEProblem
-    ode_func = build_ode_func(idxhandler, sys)
-    
-    ODEProblem(ode_func, u0, tmax, p)
+function Base.convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p)::ODEProblem
+     ODEProblem(convert(ODEFunction, idxhandler, sys), u0, tmax, p)
 end
