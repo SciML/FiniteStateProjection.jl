@@ -1,4 +1,4 @@
-using FSP
+using FiniteStateProjection
 using DifferentialEquations
 using PyPlot
 

@@ -65,8 +65,6 @@ NaiveIndexHandler(sys::FSPSystem, offset::Int) = NaiveIndexHandler(offset)
     getsubstitutions(idxhandler::NaiveIndexHandler, sys::FSPSystem; state_sym::Symbol)::Dict
 
 Defines the abundance of species ``S_i`` to be `state_sym[i] - offset`.
-
-See also: [`NaiveIndexHandler`](@ref)
 """
 function getsubstitutions(idxhandler::NaiveIndexHandler, sys::FSPSystem; state_sym::Symbol)
     Dict(symbol => Term(Base.getindex, (state_sym, i)) - idxhandler.offset for (i, symbol) in enumerate(species(sys.rs)))
@@ -117,13 +115,15 @@ reducedspecies(idxhandler::DefaultIndexHandler) = idxhandler.specs_red
     elidedspecies(idxhandler::DefaultIndexHandler)
 
 Return indices of elided species.
+
+See also: [`reducedspecies`](@ref)
 """
 elidedspecies(idxhandler::DefaultIndexHandler) = idxhandler.specs_elided
 
 ##
 
 """ 
-    elidedspecies(cons_laws)::Vector
+    elidedspecies(cons_laws::AbstractMatrix{Int})::Vector
 
 Returns a list of species ``[ s_1, ... ]`` which can be removed from the reaction system
 description using the provided matrix of conservation laws.
@@ -145,11 +145,13 @@ function elidedspecies(cons_laws::AbstractMatrix{Int})::Vector{Int}
 end
 
 """
+    elisions(idxhandler::DefaultIndexHandler, sys::FSPSystem)
+
 Replaces the symbols ``A(t)``, ``B(t)``, ... of elided species by
 ``N_1(t) - X(t) - Y(t)``, ``N_2(t) - U(t) - V(t)``, ..., where ``N_i(t)``
 are the conserved quantities of the system.
 
-See also: [`build_ratefuncs`](@ref)
+See also: [`getsubstitutions`](@ref)
 """
 function elisions(idxhandler::DefaultIndexHandler, sys::FSPSystem)
     ret = Dict()
@@ -177,8 +179,6 @@ end
 
 Similar to its [`NaiveIndexHandler`](@ref) variant, but computes the abundances of elided species
 from the conserved quantities and the reduced species.
-
-See also: [`DefaultIndexHandler`](@ref)
 """
 function getsubstitutions(idxhandler::DefaultIndexHandler, sys::FSPSystem; state_sym::Symbol)
     symbols = states(sys.rs)
@@ -199,8 +199,6 @@ end
 
 Assumes `p` is of the form `(params, cons::AbstractVector{Int})` where `params` 
 are the system parameters and `cons` the conserved quantities.
-
-See also: [`build_rhs_header`](@ref)
 """
 function build_rhs_header(idxhandler::DefaultIndexHandler, sys::FSPSystem)::Expr
     cons_names = Expr(:tuple, idxhandler.cons_syms...)
@@ -217,8 +215,6 @@ end
 
 Similar to its `NaiveIndexHandler` variant, but converts the indices into indices into
 the reduced state space array.
-
-See also: ['pairedindices`](@ref)
 """
 function pairedindices(idxhandler::DefaultIndexHandler, arr::AbstractArray{T,M}, 
                         shift::CartesianIndex{N}) where {T,M,N}

@@ -1,4 +1,4 @@
-module FSP
+module FiniteStateProjection
 
 using Reexport
 @reexport using Catalyst
@@ -10,10 +10,10 @@ using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
 export FSPSystem, AbstractIndexHandler, NaiveIndexHandler, DefaultIndexHandler,
-       conservedquantities, 
+       conservedquantities, conservationlaws,
        pairedindices, singleindices,
        reducedspecies, elidedspecies,
-       build_rhs, build_ode_func, build_ode_prob #reduced_species, elided_species, build_rhs, build_ode_func, build_ode_prob
+       build_rhs 
 
 include("fspsystem.jl")
 include("indexhandlers.jl")
