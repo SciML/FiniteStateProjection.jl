@@ -1,4 +1,4 @@
-# FSP.jl
+# FiniteStateProjection.jl
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://kaandocal.github.io/FiniteStateProjection.jl/dev/)
 
