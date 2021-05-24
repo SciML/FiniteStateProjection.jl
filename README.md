@@ -1,5 +1,5 @@
 # FSP.jl
-Finite State Projection algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
+Finite State Projection [[1]](#1)  algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
 
 ## Features:
 - Automatic dimensionality reduction for systems with conserved quantities
@@ -61,3 +61,7 @@ sol = solve(prob, Vern7(), atol=1e-6)
 ## TODO:
 - Add bursty reactions
 - Add stationary FSP support
+
+## References
+
+<a id="1">[1]</a> B. Munsky and M. Khammash, "The Finite State Projection algorithm for the solution of the Chemical Master Equation", Journal of Chemical Physics 124, 044104 (2006). https://doi.org/10.1063/1.2145882
