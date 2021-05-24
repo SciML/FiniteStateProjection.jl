@@ -48,7 +48,7 @@ u0[1] = 1.0
 prob = convert(ODEProblem, NaiveIndexHandler(sys, 1), sys, u0, 10.0, ps)
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
-![Visualisation](../../figs/birth_death.png)
+![Visualisation](assets/birth_death.png)
 
 #### Telegraph Model
 
@@ -81,7 +81,7 @@ u0[1,1] = 1.0
 prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
-![Visualisation](../../figs/telegraph.png)
+![Visualisation](assets/figs/telegraph.png)
 
 
 ## FSP Basics
