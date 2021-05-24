@@ -25,7 +25,7 @@ ps = [ 10.0, 1.0 ]
 u0 = zeros(50)
 u0[1] = 1.0
 
-prob = build_ode_prob(sys, u0, 10.0, ps)
+prob = convert(ODEProblem, NaiveIndexHandler(sys, 1), sys, u0, 10.0, ps)
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
 ![Visualisation](./figs/birth_death.png)
@@ -44,7 +44,7 @@ end r1 r2 r3 r4
 sys = FSPSystem(rs)
 
 # There is one conserved quantity: G_on + G_off
-cons = get_conserved_quantities([1,0,0], sys)
+cons = conservedquantities([1,0,0], sys)
 
 # Parameters for our system
 ps = [ 15.0, 0.25, 0.15, 1.0 ]
@@ -53,7 +53,7 @@ ps = [ 15.0, 0.25, 0.15, 1.0 ]
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = build_ode_prob(sys, u0, 10.0, ps, cons)
+prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
 ![Visualisation](./figs/telegraph.png)

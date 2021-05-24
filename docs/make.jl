@@ -1,3 +1,3 @@
-using Documenter, FSP
+using Documenter, FiniteStateProjection
 
-makedocs(sitename="FSP.jl", format = Documenter.HTML(prettyurls = false))
+makedocs(sitename="FiniteStateProjection.jl", format = Documenter.HTML(prettyurls = false))
