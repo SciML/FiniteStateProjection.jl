@@ -81,7 +81,7 @@ u0[1,1] = 1.0
 prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
-![Visualisation](assets/figs/telegraph.png)
+![Visualisation](assets/telegraph.png)
 
 
 ## FSP Basics
