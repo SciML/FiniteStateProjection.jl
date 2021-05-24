@@ -11,7 +11,7 @@ Finite State Projection [[1]](#1)  algorithms for chemical reaction networks bas
 ## Examples
 ### Birth-Death System
 ```julia
-using FSP, DifferentialEquations
+using FiniteStateProjection, DifferentialEquations
 
 @parameters r1, r2
 rs = @reaction_network begin
@@ -35,7 +35,7 @@ sol = solve(prob, Vern7(), atol=1e-6)
 
 ### Telegraph Model
 ```julia
-using FSP, DifferentialEquations
+using FiniteStateProjection, DifferentialEquations
 
 @parameters r1 r2 r3 r4
 rs = @reaction_network begin
