@@ -120,14 +120,17 @@ end
 ##
 
 """
-    build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem)
+    build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem;
+              combinatoric_ratelaw::Bool)
 
 Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME, 
 for use in the ODE solver. If `expression` is true, returns an expression, else
 compiles the function. 
 """
-function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; expression::Bool=true, striplines::Bool=expression) 
-    rfs = build_ratefuncs(idxhandler, sys, state_sym=:idx_in)
+function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
+                   expression::Bool=true, striplines::Bool=expression,
+                   combinatoric_ratelaw::Bool=true) 
+    rfs = build_ratefuncs(idxhandler, sys, state_sym=:idx_in; combinatoric_ratelaw)
     header = build_rhs_header(idxhandler, sys)
 
     first_pass = build_rhs_firstpass(idxhandler, sys, rfs)
@@ -159,8 +162,9 @@ Return an `ODEFunction` defining the right-hand side of the CME.
 Combines the RHS func and its Jacobian to define an `ODEFunction` for 
 use with `DifferentialEquations`.
 """
-function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem)::ODEFunction
-    rhs = build_rhs(idxhandler, sys, expression=false, striplines=false)
+function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
+                      combinatoric_ratelaw::Bool=true)::ODEFunction
+    rhs = build_rhs(idxhandler, sys; expression=false, striplines=false, combinatoric_ratelaw)
     ODEFunction{true}(rhs)
 end
 
@@ -169,6 +173,7 @@ end
 
 Return an `ODEProblem` for use in `DifferentialEquations. 
 """
-function Base.convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p)::ODEProblem
-     ODEProblem(convert(ODEFunction, idxhandler, sys), u0, tmax, p)
+function Base.convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p;
+                      combinatoric_ratelaw::Bool=true)::ODEProblem
+     ODEProblem(convert(ODEFunction, idxhandler, sys), u0, tmax, p; combinatoric_ratelaw)
 end
