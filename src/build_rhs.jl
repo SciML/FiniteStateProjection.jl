@@ -10,17 +10,19 @@ See also: [`build_ratefuncs`](@ref), [`build_rhs`](@ref)
 function getsubstitutions end
 
 """ 
-    build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Vector
+    build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
+                    state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
 
 Return the rate functions converted to Julia expressions in the state variable 
 `state_sym`. Abundances of the species are computed using `getsubstitutions`.
 
 See also: [`getsubstitutions`](@ref), [`build_rhs`](@ref)
 """
-function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Vector
+function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
+                         state_sym::Symbol, combinatoric_ratelaw::Bool=true)::Vector
     substitutions = getsubstitutions(idxhandler, sys, state_sym=state_sym)
     
-    return [ toexpr(substitute(jumpratelaw(reac), substitutions)) for reac in sys.rs.eqs ]
+    return [ toexpr(substitute(jumpratelaw(reac; combinatoric_ratelaw), substitutions)) for reac in sys.rs.eqs ]
 end
 
 """
