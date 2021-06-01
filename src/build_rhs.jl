@@ -22,7 +22,8 @@ function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem;
                          state_sym::Symbol, combinatoric_ratelaw::Bool=true)::Vector
     substitutions = getsubstitutions(idxhandler, sys, state_sym=state_sym)
     
-    return [ toexpr(substitute(jumpratelaw(reac; combinatoric_ratelaw), substitutions)) for reac in sys.rs.eqs ]
+    return [ toexpr(substitute(jumpratelaw(reac; combinatoric_ratelaw), substitutions)) 
+             for reac in Catalyst.get_eqs(sys.rs) ]
 end
 
 """
