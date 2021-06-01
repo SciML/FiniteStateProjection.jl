@@ -160,7 +160,10 @@ end
 Return an `ODEFunction` defining the right-hand side of the CME.
 
 Combines the RHS func and its Jacobian to define an `ODEFunction` for 
-use with `DifferentialEquations`.
+use with `DifferentialEquations`. This is where most of the work in the package
+happens; for best performance it is suggested to build an `ODEFunction` once for
+a given reaction system and reuse it instead of directly converting
+a reaction system to an `ODEProblem` (which implicitly calls this function).
 """
 function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
                       combinatoric_ratelaw::Bool=true)::ODEFunction
@@ -171,7 +174,9 @@ end
 """
     convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p)
 
-Return an `ODEProblem` for use in `DifferentialEquations. 
+Return an `ODEProblem` for use in `DifferentialEquations. This function implicitly
+calls `convert(ODEFunction, indexhandler, sys)`. It is usually more efficient to
+create an `ODEFunction` first and then use that to create `ODEProblem`s.
 """
 function Base.convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p;
                       combinatoric_ratelaw::Bool=true)::ODEProblem

@@ -116,7 +116,8 @@ elidedspecies
 ## Function Building
 
 ```@docs
-Base.convert
+Base.convert(::Type{ODEFunction}, ::AbstractIndexHandler, ::FSPSystem)
+Base.convert(::Type{ODEProblem}, ::AbstractIndexHandler, ::FSPSystem, u0, tmax, p)
 build_rhs
 unpackparams
 build_rhs_header
