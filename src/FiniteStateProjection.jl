@@ -5,6 +5,7 @@ using Reexport
 
 using ModelingToolkit
 using MacroTools
+using SparseArrays
 
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
@@ -12,11 +13,11 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 export FSPSystem, AbstractIndexHandler, NaiveIndexHandler, DefaultIndexHandler,
        conservedquantities, conservationlaws,
        pairedindices, singleindices,
-       reducedspecies, elidedspecies,
-       build_rhs 
+       reducedspecies, elidedspecies
 
 include("fspsystem.jl")
 include("indexhandlers.jl")
 include("build_rhs.jl")
+include("matrix.jl")
 
 end

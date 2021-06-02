@@ -15,6 +15,7 @@ Returns all indices `I` in `arr`. Defaults to CartesianIndices, but can
 be overloaded for arbitrary index handlers. 
 """
 singleindices(::AbstractIndexHandler, arr::AbstractArray) = CartesianIndices(arr)
+singleindices(::AbstractIndexHandler, arr::Tuple) = CartesianIndices(arr)
 
 """ 
     pairedindices(idxhandler::AbstractIndexHandler, arr, shift::CartesianIndex)
@@ -22,11 +23,21 @@ singleindices(::AbstractIndexHandler, arr::AbstractArray) = CartesianIndices(arr
 Returns all pairs of indices `(I .- shift, I)` in `arr`.
 The default implementation can be overloaded for arbitrary index handlers. 
 """
-function pairedindices(::AbstractIndexHandler, arr::AbstractArray{T,N}, 
+function pairedindices(ih::AbstractIndexHandler, arr::AbstractArray{T,N}, 
                        shift::CartesianIndex{N}) where {T,N}
+    pairedindices(ih, axes(arr), shift)
+end
+
+function pairedindices(ih::AbstractIndexHandler, dims::NTuple{N,T}, 
+                       shift::CartesianIndex{N}) where {N,T<:Number}
+    pairedindices(ih, Base.OneTo.(dims), shift)
+end
+
+function pairedindices(::AbstractIndexHandler, dims::NTuple{N,T}, 
+                       shift::CartesianIndex{N}) where {N,T<:AbstractVector}
     ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]), 
                               min(last(ax), last(ax)+shift[i])) 
-                    for (i, ax) in enumerate(axes(arr)))...)
+                    for (i, ax) in enumerate(dims))...)
     
     ranges_shifted = tuple((rng .- shift[i] for (i, rng) in enumerate(ranges))...)
    
@@ -34,6 +45,7 @@ function pairedindices(::AbstractIndexHandler, arr::AbstractArray{T,N},
 end
 
 ##
+
 
 """ 
     struct NaiveIndexHandler <: AbstractIndexHandler
@@ -220,4 +232,10 @@ function pairedindices(idxhandler::DefaultIndexHandler, arr::AbstractArray{T,M},
                         shift::CartesianIndex{N}) where {T,M,N}
     shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
     pairedindices(NaiveIndexHandler(idxhandler.offset), arr, shift_red)
+end
+
+function pairedindices(idxhandler::DefaultIndexHandler, dims::NTuple{M}, 
+                        shift::CartesianIndex{N}) where {M,N}
+    shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
+    pairedindices(NaiveIndexHandler(idxhandler.offset), dims, shift_red)
 end
