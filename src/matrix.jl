@@ -1,12 +1,13 @@
 compile_ratefunc(ex, params) = @RuntimeGeneratedFunction(Expr(:->, Expr(:tuple, :idx_in, params...), Expr(:block, ex)))
 
-function create_sparsematrix(ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps)
+function create_sparsematrix(ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps;
+                             combinatoric_ratelaw::Bool=true)
     Ntot = prod(dims)
     lind = LinearIndices(dims)
         
     paramsyms::Vector{Symbol} = Symbol.(Catalyst.params(sys.rs))
     ratefuncs::Vector{Function} = map(ex -> compile_ratefunc(ex, paramsyms), 
-                                      build_ratefuncs(ih, sys; state_sym=:idx_in))
+                                      build_ratefuncs(ih, sys; state_sym=:idx_in, combinatoric_ratelaw))
 
     I = Int[]
     J = Int[]
@@ -48,14 +49,17 @@ function create_sparsematrix(ih::AbstractIndexHandler, sys::FSPSystem, dims::NTu
     sparse(I, J, V)
 end
 
-function overwrite_sparsematrix!(out::SparseMatrixCSC, ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps)
+function overwrite_sparsematrix!(out::SparseMatrixCSC, ih::AbstractIndexHandler, 
+                                 sys::FSPSystem, dims::NTuple, ps;
+                                 combinatoric_ratelaw::Bool=true)
     Ntot = prod(dims)
     lind = LinearIndices(dims)
         
     fill!(out.nzval, 0.0)
     
     paramsyms::Vector{Symbol} = Symbol.(Catalyst.params(sys.rs))
-    ratefuncs::Vector{Function} = map(ex -> compile_ratefunc(ex, paramsyms), FiniteStateProjection.build_ratefuncs(ih, sys; state_sym=:idx_in))
+    ratefuncs::Vector{Function} = map(ex -> compile_ratefunc(ex, paramsyms), 
+                                      build_ratefuncs(ih, sys; state_sym=:idx_in, combinatoric_ratelaw))
     
     for idx_cart in singleindices(ih, dims)
         idx_lin = lind[idx_cart]
@@ -79,10 +83,10 @@ function overwrite_sparsematrix!(out::SparseMatrixCSC, ih::AbstractIndexHandler,
     out
 end
 
-function Base.convert(::Type{SparseMatrixCSC}, ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps)
-    return create_sparsematrix(ih, sys, dims, ps)
+function Base.convert(::Type{SparseMatrixCSC}, ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps; combinatoric_ratelaw::Bool=true)
+    return create_sparsematrix(ih, sys, dims, ps; combinatoric_ratelaw)
 end
 
-function Base.fill!(out::SparseMatrixCSC, ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps)
-    overwrite_sparsematrix!(out, ih, sys, dims::NTuple, ps)
+function Base.fill!(out::SparseMatrixCSC, ih::AbstractIndexHandler, sys::FSPSystem, dims::NTuple, ps; combinatoric_ratelaw::Bool=true)
+    overwrite_sparsematrix!(out, ih, sys, dims::NTuple, ps; combinatoric_ratelaw)
 end
