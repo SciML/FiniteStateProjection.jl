@@ -5,10 +5,10 @@
 Finite State Projection [[1]](#1)  algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit.jl](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
 
 ## Features:
-- Builds on top of [Catalyst.jl](https://github.com/SciML/Catalyst.jl)
-- FSP equations are generated as `ODEFunction`/`ODEProblem`s and can be solved with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl)
+- Built on top of [Catalyst.jl](https://github.com/SciML/Catalyst.jl)
+- FSP equations are generated as `ODEFunction`/`ODEProblem`s and can be solved with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl), with on-the-fly generation of targeted functions for improved performance
+- The Chemical Master Equation can be generated as a `SparseMatrixCSC`
 - Automatic dimensionality reduction for systems with conserved quantities
-- On-the-fly generation of targeted functions for improved performance
 
 More information is available in the [documentation](https://kaandocal.github.io/FiniteStateProjection.jl/dev/). Please feel free to open issues and submit pull requests! 
 
@@ -70,7 +70,6 @@ sol = solve(prob, Vern7(), atol=1e-6)
 ## TODO:
 - Add bursty reactions
 - Add stationary FSP support
-- Add support for sparse matrices
 - Add support for sparse Jacobians to speed up solvers
 
 ## References

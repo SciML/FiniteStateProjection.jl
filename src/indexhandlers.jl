@@ -6,7 +6,8 @@ abstract type AbstractIndexHandler end
 Returns all indices `I` in `arr`. Defaults to CartesianIndices, but can
 be overloaded for arbitrary index handlers. 
 """
-singleindices(::AbstractIndexHandler, arr) = CartesianIndices(arr)
+singleindices(::AbstractIndexHandler, arr::AbstractArray) = CartesianIndices(arr)
+singleindices(::AbstractIndexHandler, arr::Tuple) = CartesianIndices(arr)
 
 """ 
     pairedindices(idxhandler::AbstractIndexHandler, arr, shift::CartesianIndex)
@@ -23,7 +24,33 @@ for the abundance of species `S_i` in terms of the state variable `state_sym`.
 """
 function getsubstitutions end
 
+"""
+    vec(idxhandler::AbstractIndexHandler, arr)
+
+Converts the right-hand side defining the solution of the CME into a 
+one-dimensional vector to which a matrix can be applied. 
+
+See also: [`LinearIndices`](@ref Base.LinearIndices)
+"""
+function vec end
+
+"""
+    LinearIndices(idxhandler::AbstractIndexHandler, arr)
+
+Returns an object `lind` which converts indices returned from [`singleindices`](@ref)
+and [`pairedindices`](@ref) to linear indices compatible with [`vec`](@ref Base.vec)
+via `lind[idx_cart] = idx_lin`. The indices are related via
+
+```julia
+arr[idx_cart] == vec(idxhandler, arr)[idx_lin]
+```
+
+See also: [`vec`](@ref Base.vec)
+"""
+function LinearIndices end
+
 ##
+
 
 """ 
     struct NaiveIndexHandler <: AbstractIndexHandler
@@ -52,11 +79,24 @@ end
 NaiveIndexHandler() = NaiveIndexHandler(1)
 NaiveIndexHandler(sys::FSPSystem, offset::Int=1) = NaiveIndexHandler(offset)
 
-function pairedindices(::NaiveIndexHandler, arr::AbstractArray{T,N}, 
+Base.vec(::NaiveIndexHandler, arr) = vec(arr)
+Base.LinearIndices(::NaiveIndexHandler, arr) = LinearIndices(arr)
+
+function pairedindices(ih::NaiveIndexHandler, arr::AbstractArray{T,N}, 
                        shift::CartesianIndex{N}) where {T,N}
+    pairedindices(ih, axes(arr), shift)
+end
+
+function pairedindices(ih::NaiveIndexHandler, dims::NTuple{N,T}, 
+                       shift::CartesianIndex{N}) where {N,T<:Number}
+    pairedindices(ih, Base.OneTo.(dims), shift)
+end
+
+function pairedindices(::NaiveIndexHandler, dims::NTuple{N,T}, 
+                       shift::CartesianIndex{N}) where {N,T<:AbstractVector}
     ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]), 
                               min(last(ax), last(ax)+shift[i])) 
-                    for (i, ax) in enumerate(axes(arr)))...)
+                    for (i, ax) in enumerate(dims))...)
     
     ranges_shifted = tuple((rng .- shift[i] for (i, rng) in enumerate(ranges))...)
    
@@ -222,4 +262,10 @@ function pairedindices(idxhandler::DefaultIndexHandler, arr::AbstractArray{T,M},
                         shift::CartesianIndex{N}) where {T,M,N}
     shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
     pairedindices(NaiveIndexHandler(idxhandler.offset), arr, shift_red)
+end
+
+function pairedindices(idxhandler::DefaultIndexHandler, dims::NTuple{M}, 
+                        shift::CartesianIndex{N}) where {M,N}
+    shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
+    pairedindices(NaiveIndexHandler(idxhandler.offset), dims, shift_red)
 end

@@ -3,6 +3,11 @@
 CurrentModule = FiniteStateProjection
 ```
 
+## Reaction Systems
+```@docs
+conservationlaws(::AbstractMatrix{Int})
+```
+
 ## [Index Handlers](@id index_handlers_internal)
 
 ### Index Handler Interface
@@ -13,11 +18,16 @@ User-defined index handlers should inherit from `AbstractIndexHandler` and imple
 - [`singleindices`](@ref singleindices)
 - [`pairedindices`](@ref pairedindices)
 
+For matrix conversions they should additionally implement:
+- [`LinearIndices`](@ref Base.LinearIndices)
+- [`vec`](@ref Base.vec)
+
 ```@docs
-singleindices(::AbstractIndexHandler, arr)
+singleindices
 pairedindices
 getsubstitutions
 build_rhs_header(::AbstractIndexHandler, ::FSPSystem)
+LinearIndices
 ```
 
 ### Built-in implementations

@@ -65,10 +65,10 @@ end
 """
     build_rhs_firstpass(sys::FSPSystem, rfs)::Expr
 
-Return code for the first pass of the RHS function. Goes through
-all reactions and computes the negative part of the CME (probability
-flowing out of states). This is a simple array traversal and can be
-done in one go for all reactions.
+Return code for the first pass of the RHS function, for the time-dependent
+FSP. Goes through all reactions and computes the negative part of the CME 
+(probability flowing out of states). This is a simple array traversal and 
+can be done in one go for all reactions.
 
 See also: [`build_rhs`](@ref)
 """
@@ -156,14 +156,14 @@ end
 ##
 
 """
-    convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem)
+    convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
+            combinatoric_ratelaw::Bool=true)
 
 Return an `ODEFunction` defining the right-hand side of the CME.
 
-Combines the RHS func and its Jacobian to define an `ODEFunction` for 
-use with `DifferentialEquations`. This is where most of the work in the package
-happens; for best performance it is suggested to build an `ODEFunction` once for
-a given reaction system and reuse it instead of directly converting
+Creates an `ODEFunction` for use with `DifferentialEquations`. This is where most of 
+the work in the package happens; for best performance it is suggested to build an `ODEFunction` 
+once for a given reaction system and reuse it instead of directly converting
 a reaction system to an `ODEProblem` (which implicitly calls this function).
 """
 function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
