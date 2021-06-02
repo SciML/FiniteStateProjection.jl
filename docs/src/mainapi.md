@@ -1,4 +1,7 @@
 # Main API
+```@meta
+CurrentModule = FiniteStateProjection
+```
 
 ## Reaction Systems
 

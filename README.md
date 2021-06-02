@@ -2,16 +2,21 @@
 
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://kaandocal.github.io/FiniteStateProjection.jl/dev/)
 
-Finite State Projection [[1]](#1)  algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
+Finite State Projection [[1]](#1)  algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit.jl](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
 
 ## Features:
+- Builds on top of [Catalyst.jl](https://github.com/SciML/Catalyst.jl)
+- FSP equations are generated as `ODEFunction`/`ODEProblem`s and can be solved with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl)
 - Automatic dimensionality reduction for systems with conserved quantities
 - On-the-fly generation of targeted functions for improved performance
+
+More information is available in the [documentation](https://kaandocal.github.io/FiniteStateProjection.jl/dev/). Please feel free to open issues and submit pull requests! 
 
 ## Examples
 ### Birth-Death System
 ```julia
-using FiniteStateProjection, DifferentialEquations
+using FiniteStateProjection
+using OrdinaryDiffEqs
 
 @parameters r1, r2
 rs = @reaction_network begin
@@ -28,14 +33,15 @@ ps = [ 10.0, 1.0 ]
 u0 = zeros(50)
 u0[1] = 1.0
 
-prob = convert(ODEProblem, NaiveIndexHandler(sys, 1), sys, u0, 10.0, ps)
+prob = convert(ODEProblem, NaiveIndexHandler(), sys, u0, 10.0, ps)
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
 ![Visualisation](docs/src/assets/birth_death.png)
 
 ### Telegraph Model
 ```julia
-using FiniteStateProjection, DifferentialEquations
+using FiniteStateProjection
+using OrdinaryDiffEqs
 
 @parameters r1 r2 r3 r4
 rs = @reaction_network begin
@@ -47,7 +53,7 @@ end r1 r2 r3 r4
 sys = FSPSystem(rs)
 
 # There is one conserved quantity: G_on + G_off
-cons = conservedquantities([1,0,0], sys)
+cons = conservedquantities([1, 0, 0], sys)
 
 # Parameters for our system
 ps = [ 15.0, 0.25, 0.15, 1.0 ]
@@ -56,7 +62,7 @@ ps = [ 15.0, 0.25, 0.15, 1.0 ]
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
+prob = convert(ODEProblem, DefaultIndexHandler(sys), sys, u0, 10.0, (ps, cons))
 sol = solve(prob, Vern7(), atol=1e-6)
 ```
 ![Visualisation](docs/src/assets/telegraph.png)
@@ -64,6 +70,8 @@ sol = solve(prob, Vern7(), atol=1e-6)
 ## TODO:
 - Add bursty reactions
 - Add stationary FSP support
+- Add support for sparse matrices
+- Add support for sparse Jacobians to speed up solvers
 
 ## References
 
