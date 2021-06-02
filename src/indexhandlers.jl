@@ -1,11 +1,3 @@
-""" 
-    abstract type AbstractIndexHandler end
-
-`FSP.jl` splits handling of the FSP into two parts. The first defines
-how the CME is compute
-
-See also: [`singleindices`](@ref), [`pairedindices`](@ref)
-"""
 abstract type AbstractIndexHandler end
 
 """ 
@@ -14,24 +6,22 @@ abstract type AbstractIndexHandler end
 Returns all indices `I` in `arr`. Defaults to CartesianIndices, but can
 be overloaded for arbitrary index handlers. 
 """
-singleindices(::AbstractIndexHandler, arr::AbstractArray) = CartesianIndices(arr)
+singleindices(::AbstractIndexHandler, arr) = CartesianIndices(arr)
 
 """ 
     pairedindices(idxhandler::AbstractIndexHandler, arr, shift::CartesianIndex)
 
 Returns all pairs of indices `(I .- shift, I)` in `arr`.
-The default implementation can be overloaded for arbitrary index handlers. 
 """
-function pairedindices(::AbstractIndexHandler, arr::AbstractArray{T,N}, 
-                       shift::CartesianIndex{N}) where {T,N}
-    ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]), 
-                              min(last(ax), last(ax)+shift[i])) 
-                    for (i, ax) in enumerate(axes(arr)))...)
-    
-    ranges_shifted = tuple((rng .- shift[i] for (i, rng) in enumerate(ranges))...)
-   
-    zip(CartesianIndices(ranges_shifted), CartesianIndices(ranges))
-end
+function pairedindices end
+
+"""
+    getsubstitutions(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)
+
+Returns a dict of the form `S_i => f_i(state_sym)`, where each `f_i` is an expression 
+for the abundance of species `S_i` in terms of the state variable `state_sym`.
+"""
+function getsubstitutions end
 
 ##
 
@@ -51,7 +41,7 @@ due to the presence of conservation laws. It is generally better
 to use `DefaultIndexHandler`, which will automatically elide species
 where possible.
 
-Constructors: `NaiveIndexHandler([sys::FSPSystem,] offset::Int)`
+Constructors: `NaiveIndexHandler([sys::FSPSystem, offset::Int=1])`
 
 See also: [`DefaultIndexHandler`](@ref)
 """
@@ -59,7 +49,19 @@ struct NaiveIndexHandler <: AbstractIndexHandler
     offset::Int
 end
 
-NaiveIndexHandler(sys::FSPSystem, offset::Int) = NaiveIndexHandler(offset)
+NaiveIndexHandler() = NaiveIndexHandler(1)
+NaiveIndexHandler(sys::FSPSystem, offset::Int=1) = NaiveIndexHandler(offset)
+
+function pairedindices(::NaiveIndexHandler, arr::AbstractArray{T,N}, 
+                       shift::CartesianIndex{N}) where {T,N}
+    ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]), 
+                              min(last(ax), last(ax)+shift[i])) 
+                    for (i, ax) in enumerate(axes(arr)))...)
+    
+    ranges_shifted = tuple((rng .- shift[i] for (i, rng) in enumerate(ranges))...)
+   
+    zip(CartesianIndices(ranges_shifted), CartesianIndices(ranges))
+end
 
 """
     getsubstitutions(idxhandler::NaiveIndexHandler, sys::FSPSystem; state_sym::Symbol)::Dict
@@ -81,7 +83,7 @@ using conservation laws. Describes the system using a subset of the original
 species which can be obtained via [`reducedspecies`](@ref). Reduces the 
 dimensionality of the FSP by the number of conservation laws in the system.
 
-Constructors: `DefaultIndexHandler(sys::FSPSystem, offset::Int)`
+Constructors: `DefaultIndexHandler(sys::FSPSystem[, offset::Int=1])`
 
 See also: [`reducedspecies`](@ref), [`elidedspecies`](@ref), [`NaiveIndexHandler`](@ref)
 """
@@ -92,7 +94,7 @@ struct DefaultIndexHandler <: AbstractIndexHandler
     cons_syms::Vector{Symbol}
 end
 
-function DefaultIndexHandler(sys::FSPSystem, offset::Int)
+function DefaultIndexHandler(sys::FSPSystem, offset::Int=1)
     cons_laws = conservationlaws(sys)
     specs_elided = elidedspecies(cons_laws)
     specs_red = [ i for i in 1:length(species(sys.rs)) if !(i in specs_elided) ]

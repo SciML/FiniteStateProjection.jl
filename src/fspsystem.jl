@@ -6,9 +6,11 @@ netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
     struct FSPSystem
         rs::ReactionSystem
         cons_laws::Matrix{Int}
-end
+    end
 
-Thin wrapper around `ReactionSystem` for use with this package.
+Thin wrapper around `ModelingToolkit.ReactionSystem` for use with this package. 
+Automatically computes a matrix of conservation laws (see 
+[`conservationlaws`](@ref)). 
 
 Constructor: `FSPSystem(rs::ReactionSystem)`
 """
@@ -25,8 +27,7 @@ end
     conservationlaws(netstoichmat::AbstractMatrix{Int})::Matrix{Int}
 
 Given the net stoichiometry matrix of a reaction system, computes a matrix
-of conservation laws. Each row contains the stoichiometric coefficients
-of a different conserved quantity.
+of conservation laws (each represented as a row in the output). 
 """
 function conservationlaws(nsm::AbstractMatrix{Int})::Matrix{Int}
     n_reac, n_spec = size(nsm)
@@ -57,7 +58,8 @@ end
 """
     conservationlaws(sys::FSPSystem)::Matrix{Int}
 
-Returns conservation laws associated with the system.
+Returns matrix of conservation laws associated with the system. Each row of 
+the matrix contains the stoichiometric coefficients of a different conserved quantity.
 """
 conservationlaws(sys::FSPSystem) = sys.cons_laws
 
@@ -66,5 +68,5 @@ conservationlaws(sys::FSPSystem) = sys.cons_laws
 
 Compute conserved quantities for the system at the given state.
 """
-conservedquantities(state::AbstractVector{Int}, sys::FSPSystem) = conservationlaws(sys) * state
+conservedquantities(state::AbstractVector, sys::FSPSystem) = conservationlaws(sys) * state
 
