@@ -1,15 +1,4 @@
 """ 
-    getsubstitutions(idxhandler::AbstractIndexHandler, sys::FSPSystem; state_sym::Symbol)::Dict
-
-Construct the map `speciesname => expr` that gives the species abundances
-in terms of the state variable `state_sym`. See [`NaiveIndexHandler`](@ref)
-for the default implementation.
-
-See also: [`build_ratefuncs`](@ref), [`build_rhs`](@ref)
-"""
-function getsubstitutions end
-
-""" 
     build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
                     state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
 
