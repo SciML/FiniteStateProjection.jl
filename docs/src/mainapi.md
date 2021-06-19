@@ -18,6 +18,6 @@ conservedquantities
 The following methods are the main way to create a system of ODEs representing the time-dependent FSP. This package provides a flexible way to represent the FSP in memory via index handlers, see [Index Handlers] for more information. 
  
 ```@docs
-Base.convert(::Type{ODEFunction}, ::AbstractIndexHandler, ::FSPSystem)
-Base.convert(::Type{ODEProblem}, ::AbstractIndexHandler, ::FSPSystem, u0, tmax, p)
+Base.convert(::Type{ODEFunction}, ::FSPSystem)
+Base.convert(::Type{ODEProblem}, ::FSPSystem, u0, tmax, p)
 ```

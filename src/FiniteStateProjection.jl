@@ -12,7 +12,7 @@ import Base: LinearIndices, vec
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
-export FSPSystem, NaiveIndexHandler, DefaultIndexHandler,
+export FSPSystem, NaiveIndexHandler, ReducingIndexHandler,
        conservedquantities, conservationlaws,
        reducedspecies, elidedspecies
 

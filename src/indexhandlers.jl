@@ -193,7 +193,7 @@ function elidedspecies(cons_laws::AbstractMatrix{Int})::Vector{Int}
 end
 
 """
-    elisions(idxhandler::ReducingIndexHandler, sys::FSPSystem)
+    elisions(idxhandler::ReducingIndexHandler, rs::ReactionSystem)
 
 Replaces the symbols ``A(t)``, ``B(t)``, ... of elided species by
 ``N_1(t) - X(t) - Y(t)``, ``N_2(t) - U(t) - V(t)``, ..., where ``N_i(t)``
@@ -201,13 +201,13 @@ are the conserved quantities of the system.
 
 See also: [`getsubstitutions`](@ref)
 """
-function elisions(idxhandler::ReducingIndexHandler, sys::FSPSystem)
+function elisions(idxhandler::ReducingIndexHandler, rs::ReactionSystem)
     ret = Dict()
-    spec_syms = species(sys.rs)
+    spec_syms = species(rs)
   
     for (i, spec) in enumerate(elidedspecies(idxhandler))
         sym = spec_syms[spec]
-        cons_law = sys.cons_laws[i,:]
+        cons_law = idxhandler.cons_laws[i,:]
       
         # Does this always work? What if some of the species on the RHS
         # also end up getting elided at some point?
@@ -223,18 +223,18 @@ end
 ##
 
 """
-    getsubstitutions(idxhandler::ReducingIndexHandler, sys::FSPSystem; state_sym::Symbol)::Dict
+    getsubstitutions(idxhandler::ReducingIndexHandler, rs::ReactionSystem; state_sym::Symbol)::Dict
 
 Similar to its [`NaiveIndexHandler`](@ref) variant, but computes the abundances of elided species
 from the conserved quantities and the reduced species.
 """
-function getsubstitutions(idxhandler::ReducingIndexHandler, sys::FSPSystem; state_sym::Symbol)
-    symbols = states(sys.rs)
+function getsubstitutions(idxhandler::ReducingIndexHandler, rs::ReactionSystem; state_sym::Symbol)
+    symbols = states(rs)
     
     ret = Dict{Any,Any}(symbols[spec] => Term(Base.getindex, (state_sym, i)) - idxhandler.offset 
                                               for (i, spec) in enumerate(reducedspecies(idxhandler)))
     
-    elision_dict = elisions(idxhandler, sys)
+    elision_dict = elisions(idxhandler, rs)
     for (spec, ex) in pairs(elision_dict)
         ret[spec] = substitute(ex, ret)
     end

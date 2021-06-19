@@ -1,4 +1,4 @@
-# Tips and Tricks
+# [Tips and Tricks](@id tips)
 
 The FSP approximates an infinite-dimensional system of equations by truncating it to a finite number of variables. The accuracy of the FSP therefore depends on how many variables are retained, ie.~what portion of the state space is modelled. While simple reaction networks with 1 or 2 species are not too difficult to handle using the FSP, a naive approach will require unfeasibly large truncations for systems of even moderate complexity.
 

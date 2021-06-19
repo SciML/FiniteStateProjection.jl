@@ -20,3 +20,7 @@ This function is generated dynamically as an `ODEFunction` for use with Differen
 - The Chemical Master Equation can be generated as a `SparseMatrixCSC`
 - Flexible API for user-defined array types via `IndexHandler`s
 - Automatic dimensionality reduction for systems with conserved quantities
+
+## Acknowledgments
+
+Special thanks to [Xiamong Fu](https://github.com/palmtree2013), [Brian Munsky](https://www.engr.colostate.edu/~munsky/) and [Huy Vo](https://github.com/voduchuy) for their examples and suggestions and for contributing most of the content in the [Tips & Tricks](@ref tips) page!

@@ -26,7 +26,7 @@ For matrix conversions they should additionally implement:
 singleindices
 pairedindices
 getsubstitutions
-build_rhs_header(::AbstractIndexHandler, ::FSPSystem)
+build_rhs_header
 LinearIndices
 ```
 
@@ -34,10 +34,10 @@ LinearIndices
 ```@docs
 elidedspecies(::AbstractMatrix{Int})
 elisions
-getsubstitutions(::NaiveIndexHandler, ::FSPSystem)
-getsubstitutions(::DefaultIndexHandler, ::FSPSystem)
-build_rhs_header(::DefaultIndexHandler, ::FSPSystem)
-pairedindices(::DefaultIndexHandler, ::AbstractArray, ::CartesianIndex)
+getsubstitutions(::NaiveIndexHandler, ::ReactionSystem)
+getsubstitutions(::ReducingIndexHandler, ::ReactionSystem)
+build_rhs_header(::FSPSystem{ReducingIndexHandler})
+pairedindices(::ReducingIndexHandler, ::AbstractArray, ::CartesianIndex)
 ```
 
 ## Function Building

@@ -92,14 +92,6 @@ end
 
 ##
 
-"""
-    build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem;
-              combinatoric_ratelaw::Bool)
-
-Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME, 
-for use in the ODE solver. If `expression` is true, returns an expression, else
-compiles the function. 
-"""
 function build_rhs_ex(sys::FSPSystem; striplines::Bool=true) 
     header = build_rhs_header(sys)
     first_pass = build_rhs_firstpass(sys)
@@ -116,8 +108,14 @@ function build_rhs_ex(sys::FSPSystem; striplines::Bool=true)
     ex
 end
 
-function build_rhs(sys::FSPSystem; striplines::Bool=false) 
-    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines=striplines))
+"""
+    build_rhs(sys::FSPSystem)
+
+Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME
+for use with DifferentialEquations.jl. 
+"""
+function build_rhs(sys::FSPSystem) 
+    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines=false))
 end
 
 ##

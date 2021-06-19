@@ -1,7 +1,6 @@
 using Documenter
 using FiniteStateProjection
 using SparseArrays
-using FiniteStateProjection: AbstractIndexHandler
 
 makedocs(sitename="FiniteStateProjection.jl", 
          modules=[FiniteStateProjection],
@@ -12,7 +11,7 @@ makedocs(sitename="FiniteStateProjection.jl",
              "Index Handlers" => "indexhandlers.md",
              "Matrix Conversions" => "matrix.md",
              "Internal API" => "internal.md",
-             "Tips & Tricks" => "tips.md"
+             "Tips & Tricks" => "tips.md",
              "Examples" => "examples.md"
          ])
  

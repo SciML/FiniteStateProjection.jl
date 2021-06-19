@@ -52,7 +52,7 @@ end ρ σ_on σ_off d
 
 # This automatically reduces the dimensionality of the
 # network by exploiting conservation laws
-ih = ReducedIndexHandler(rn)
+ih = ReducingIndexHandler(rn)
 sys = FSPSystem(rn, ih)
 
 # There is one conserved quantity: G_on + G_off
