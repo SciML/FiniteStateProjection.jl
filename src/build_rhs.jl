@@ -1,20 +1,3 @@
-""" 
-    build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
-                    state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
-
-Return the rate functions converted to Julia expressions in the state variable 
-`state_sym`. Abundances of the species are computed using `getsubstitutions`.
-
-See also: [`getsubstitutions`](@ref), [`build_rhs`](@ref)
-"""
-function build_ratefuncs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
-                         state_sym::Symbol, combinatoric_ratelaw::Bool=true)::Vector
-    substitutions = getsubstitutions(idxhandler, sys, state_sym=state_sym)
-    
-    return [ toexpr(substitute(jumpratelaw(reac; combinatoric_ratelaw), substitutions)) 
-             for reac in Catalyst.get_eqs(sys.rs) ]
-end
-
 """
     unpackparams(sys::FSPSystem, psym::Symbol)
 
@@ -29,7 +12,7 @@ function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
     param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
      
     quote 
-        $(param_names) = ps::AbstractVector{Float64}
+        $(param_names) = ps
     end
 end
 
@@ -42,7 +25,7 @@ just unpacks parameters from `p`.
 
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
-function build_rhs_header(::AbstractIndexHandler, sys::FSPSystem)::Expr
+function build_rhs_header(sys::FSPSystem)::Expr
     quote 
         ps::AbstractVector{Float64} = p
         $(unpackparams(sys, :ps))
@@ -61,14 +44,14 @@ can be done in one go for all reactions.
 
 See also: [`build_rhs`](@ref)
 """
-function build_rhs_firstpass(idxhandler::AbstractIndexHandler, sys::FSPSystem, rfs::AbstractVector)::Expr
-    isempty(rfs) && return quote end
+function build_rhs_firstpass(sys::FSPSystem)
+    isempty(sys.rfs) && return quote end 
         
-    first_line = :(du[idx_in] = -u[idx_in] * $(rfs[1]))
-    other_lines = (:(du[idx_in] -= u[idx_in] * $(rf)) for rf in rfs[2:end])
+    first_line = :(du[idx_in] = -u[idx_in] * $(sys.rfs[1].body))
+    other_lines = (:(du[idx_in] -= u[idx_in] * $(rf.body)) for rf in sys.rfs[2:end])
     
     quote
-        for idx_in in singleindices($(idxhandler), u)
+        for idx_in in singleindices($(sys.ih), u)
             $first_line
             $(other_lines...)
         end
@@ -78,7 +61,7 @@ end
 ##
 
 """
-    build_rhs_secondpass(sys::FSPSystem, rfs)::Expr
+    build_rhs_secondpass(sys::FSPSystem)::Expr
 
 Return code for the second pass of the RHS function. Goes through
 all reactions and computes the positive part of the CME (probability
@@ -88,16 +71,16 @@ random memory access reactions are processed one by one.
 
 See also: [`build_rhs`](@ref)
 """
-function build_rhs_secondpass(idxhandler::AbstractIndexHandler, sys::FSPSystem, rfs::AbstractVector)::Expr
-    isempty(rfs) && return quote end
+function build_rhs_secondpass(sys::FSPSystem)::Expr
+    isempty(sys.rfs) && return quote end
     
     S = netstoichmat(sys.rs)
     ret = Expr(:block)
     
-    for (i, rf) in enumerate(rfs)
+    for (i, rf) in enumerate(sys.rfs)
         ex = quote
-            for (idx_in, idx_out) in pairedindices($(idxhandler), u, $(CartesianIndex(S[i,:]...)))
-                du[idx_out] += u[idx_in] * $(rf)
+            for (idx_in, idx_out) in pairedindices($(sys.ih), u, $(CartesianIndex(S[i,:]...)))
+                du[idx_out] += u[idx_in] * $(rf.body)
             end
         end
         
@@ -117,29 +100,24 @@ Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME,
 for use in the ODE solver. If `expression` is true, returns an expression, else
 compiles the function. 
 """
-function build_rhs(idxhandler::AbstractIndexHandler, sys::FSPSystem; 
-                   expression::Bool=true, striplines::Bool=expression,
-                   combinatoric_ratelaw::Bool=true) 
-    rfs = build_ratefuncs(idxhandler, sys, state_sym=:idx_in; combinatoric_ratelaw)
-    header = build_rhs_header(idxhandler, sys)
-
-    first_pass = build_rhs_firstpass(idxhandler, sys, rfs)
-    second_pass = build_rhs_secondpass(idxhandler, sys, rfs)
+function build_rhs_ex(sys::FSPSystem; striplines::Bool=true) 
+    header = build_rhs_header(sys)
+    first_pass = build_rhs_firstpass(sys)
+    second_pass = build_rhs_secondpass(sys)
     
-    args = Expr(:tuple, :du, :u, :p, :t)
     body = Expr(:block, header, first_pass, second_pass)
     
-    ex = Expr(:function, args, body) 
+    ex = :((du, u, p, t) -> $(body)) 
     
     striplines && (ex = MacroTools.striplines(ex))
     
     ex = ex |> MacroTools.flatten |> MacroTools.prettify
     
-    if expression
-        return ex
-    else
-        return @RuntimeGeneratedFunction(ex)
-    end
+    ex
+end
+
+function build_rhs(sys::FSPSystem; striplines::Bool=false) 
+    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines=striplines))
 end
 
 ##
@@ -155,9 +133,9 @@ the work in the package happens; for best performance it is suggested to build a
 once for a given reaction system and reuse it instead of directly converting
 a reaction system to an `ODEProblem` (which implicitly calls this function).
 """
-function Base.convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
+function Base.convert(::Type{ODEFunction}, sys::FSPSystem;
                       combinatoric_ratelaw::Bool=true)::ODEFunction
-    rhs = build_rhs(idxhandler, sys; expression=false, striplines=false, combinatoric_ratelaw)
+    rhs = build_rhs(sys; striplines=false)
     ODEFunction{true}(rhs)
 end
 
@@ -168,7 +146,7 @@ Return an `ODEProblem` for use in `DifferentialEquations. This function implicit
 calls `convert(ODEFunction, indexhandler, sys)`. It is usually more efficient to
 create an `ODEFunction` first and then use that to create `ODEProblem`s.
 """
-function Base.convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p;
+function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, p;
                       combinatoric_ratelaw::Bool=true)::ODEProblem
-     ODEProblem(convert(ODEFunction, idxhandler, sys), u0, tmax, p; combinatoric_ratelaw)
+     ODEProblem(convert(ODEFunction, sys), u0, tint, p; combinatoric_ratelaw)
 end

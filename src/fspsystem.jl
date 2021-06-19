@@ -3,8 +3,9 @@ import AbstractAlgebra
 netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
 
 """ 
-    struct FSPSystem
+    struct FSPSystem{IHT <: AbstractIndexHandler}
         rs::ReactionSystem
+        ih::IHT
         cons_laws::Matrix{Int}
     end
 
@@ -14,16 +15,53 @@ Automatically computes a matrix of conservation laws (see
 
 Constructor: `FSPSystem(rs::ReactionSystem)`
 """
-struct FSPSystem
+struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rs::ReactionSystem
+    ih::IHT
     cons_laws::Matrix{Int}
+    rfs::RT
 end
 
-function FSPSystem(rs::ReactionSystem)
-    FSPSystem(rs, conservationlaws(netstoichmat(rs)))
+function FSPSystem(rs::ReactionSystem, ih=NaiveIndexHandler(); combinatoric_ratelaw::Bool=true)
+    rfs = create_ratefuncs(rs, ih; combinatoric_ratelaw=combinatoric_ratelaw)
+    FSPSystem(rs, ih, conservationlaws(rs), rfs)
 end
 
 """ 
+    build_ratefuncs(rs, ih; 
+                    state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
+
+Return the rate functions converted to Julia expressions in the state variable 
+`state_sym`. Abundances of the species are computed using `getsubstitutions`.
+
+See also: [`getsubstitutions`](@ref), [`build_rhs`](@ref)
+"""
+function build_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; state_sym::Symbol, combinatoric_ratelaw::Bool=true)
+    substitutions = getsubstitutions(ih, rs, state_sym=state_sym)
+    
+    return map(Catalyst.get_eqs(rs)) do reac
+        jrl = jumpratelaw(reac; combinatoric_ratelaw)
+        jrl_s = substitute(jrl, substitutions)
+        toexpr(jrl_s)
+    end
+end
+
+function create_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; combinatoric_ratelaw::Bool=true)
+    paramsyms = Symbol.(Catalyst.params(rs))
+    
+    return tuple(map(ex -> compile_ratefunc(ex, paramsyms), 
+                     build_ratefuncs(rs, ih; state_sym=:idx_in, combinatoric_ratelaw))...)
+end 
+
+function compile_ratefunc(ex_rf, params) 
+    # Make this nicer in the future
+    ex = :((idx_in, t, $(params...)) -> $(ex_rf))
+    @RuntimeGeneratedFunction(ex)
+end
+
+
+""" 
+    conservationlaws(rs::ReactionSystem)::Matrix{Int}
     conservationlaws(netstoichmat::AbstractMatrix{Int})::Matrix{Int}
 
 Given the net stoichiometry matrix of a reaction system, computes a matrix
@@ -55,6 +93,8 @@ function conservationlaws(nsm::AbstractMatrix{Int})::Matrix{Int}
     ret
 end
 
+conservationlaws(rs::ReactionSystem) = conservationlaws(netstoichmat(rs))
+
 """
     conservationlaws(sys::FSPSystem)::Matrix{Int}
 
@@ -64,9 +104,9 @@ the matrix contains the stoichiometric coefficients of a different conserved qua
 conservationlaws(sys::FSPSystem) = sys.cons_laws
 
 """
-    conservedquantities(state, sys::FSPSystem)
+    conservedquantities(state, sys)
 
 Compute conserved quantities for the system at the given state.
 """
-conservedquantities(state::AbstractVector, sys::FSPSystem) = conservationlaws(sys) * state
+conservedquantities(state::AbstractVector, sys) = conservationlaws(sys) * state
 

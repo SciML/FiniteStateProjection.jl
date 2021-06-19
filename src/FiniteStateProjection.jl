@@ -16,6 +16,8 @@ export FSPSystem, NaiveIndexHandler, DefaultIndexHandler,
        conservedquantities, conservationlaws,
        reducedspecies, elidedspecies
 
+abstract type AbstractIndexHandler end
+
 include("fspsystem.jl")
 include("indexhandlers.jl")
 include("build_rhs.jl")

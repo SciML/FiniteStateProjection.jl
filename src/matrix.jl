@@ -1,13 +1,6 @@
-compile_ratefunc(ex, params) = @RuntimeGeneratedFunction(Expr(:->, Expr(:tuple, :idx_in, params...), Expr(:block, ex)))
-
-function create_sparsematrix(sys::FSPSystem, ih::AbstractIndexHandler, dims::NTuple, ps;
-                             combinatoric_ratelaw::Bool=true)
+function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
     Ntot = prod(dims)
-    lind = LinearIndices(ih, dims)
-        
-    paramsyms::Vector{Symbol} = Symbol.(Catalyst.params(sys.rs))
-    ratefuncs::Vector{Function} = map(ex -> compile_ratefunc(ex, paramsyms), 
-                                      build_ratefuncs(ih, sys; state_sym=:idx_in, combinatoric_ratelaw))
+    lind = LinearIndices(sys.ih, dims)
 
     I = Int[]
     J = Int[]
@@ -21,27 +14,27 @@ function create_sparsematrix(sys::FSPSystem, ih::AbstractIndexHandler, dims::NTu
 
     V = zeros(predsize)
 
-    for idx_cart in singleindices(ih, dims)
+    for idx_cart in singleindices(sys.ih, dims)
         idx_lin = lind[idx_cart]
         push!(I, idx_lin)
         push!(J, idx_lin)
 
         k = length(I)
-        for rf in ratefuncs
-            V[k] -= rf(idx_cart, ps...)
+        for rf in sys.rfs
+            V[k] -= rf(idx_cart, t, ps...)
         end
     end
 
     S::Matrix{Int64} = netstoichmat(sys.rs)
-    for (i, reaction) in enumerate(Catalyst.get_eqs(sys.rs))
-        for (idx_cin, idx_cout) in pairedindices(ih, dims, CartesianIndex(S[i,:]...))
+    for (i, rf) in enumerate(sys.rfs)
+        for (idx_cin, idx_cout) in pairedindices(sys.ih, dims, CartesianIndex(S[i,:]...))
             idx_lin = lind[idx_cin]
             idx_lout = lind[idx_cout]
             push!(I, lind[idx_cout])
             push!(J, lind[idx_cin])
 
             k = length(I)
-            V[k] = ratefuncs[i](idx_cin, ps...)
+            V[k] = rf(idx_cin, t, ps...)
         end
     end
 
@@ -50,15 +43,13 @@ function create_sparsematrix(sys::FSPSystem, ih::AbstractIndexHandler, dims::NTu
 end
 
 """
-    Base.convert(::Type{SparseMatrixCSC}, ::FSPSystem, ::AbstractIndexHandler, dims::NTuple, ps;
-                 combinatoric_ratelaws=true)
+    Base.convert(::Type{SparseMatrixCSC}, ::FSPSystem, dims::NTuple, ps, t)
 
 Convert the reaction system into a sparse matrix defining the right-hand side of the 
 Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP and 
 `ps` is the tuple of parameters. The sparse matrix works on the flattened version
 of the state obtained using `vec`.
 """
-function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, ih::AbstractIndexHandler, 
-                      dims::NTuple, ps; combinatoric_ratelaw::Bool=true)
-    return create_sparsematrix(sys, ih, dims, ps; combinatoric_ratelaw)
+function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, t)
+    return create_sparsematrix(sys, dims, ps, t)
 end
