@@ -12,6 +12,7 @@ makedocs(sitename="FiniteStateProjection.jl",
              "Index Handlers" => "indexhandlers.md",
              "Matrix Conversions" => "matrix.md",
              "Internal API" => "internal.md",
+             "Tips & Tricks" => "tips.md"
              "Examples" => "examples.md"
          ])
  
