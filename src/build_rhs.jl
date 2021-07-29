@@ -4,15 +4,15 @@
 Returns code unpacking the parameters of the system from the symbol
 `psym` in the form `(p1, p2, ...) = psym`. This should be called in
 all overloads of [`build_rhs_header`](@ref). It is assumed that
-the variable `psym` is an `AbstractVector{Float64}`.
+the variable `psym` is an `AbstractVector`.
 
 See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
 function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
     param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
-
-    quote
-        $(param_names) = ps
+     
+    quote 
+        $(param_names) = $(psym)
     end
 end
 
@@ -26,8 +26,8 @@ just unpacks parameters from `p`.
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
 function build_rhs_header(sys::FSPSystem)::Expr
-    quote
-        ps::AbstractVector{Float64} = p
+    quote 
+        ps = p
         $(unpackparams(sys, :ps))
     end
 end

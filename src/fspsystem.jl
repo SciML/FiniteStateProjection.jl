@@ -55,7 +55,7 @@ end
 
 function compile_ratefunc(ex_rf, params) 
     # Make this nicer in the future
-    ex = :((idx_in, t, $(params...)) -> $(ex_rf))
+    ex = :((idx_in, t, $(params...)) -> $(ex_rf)) |> MacroTools.flatten
     @RuntimeGeneratedFunction(ex)
 end
 
