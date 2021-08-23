@@ -106,7 +106,7 @@ end
 Defines the abundance of species ``S_i`` to be `state_sym[i] - offset`.
 """
 function getsubstitutions(ih::NaiveIndexHandler, rs::ReactionSystem; state_sym::Symbol)
-    Dict(symbol => Term(Base.getindex, (state_sym, i)) - ih.offset for (i, symbol) in enumerate(species(rs)))
+    Dict(symbol => Term{Number}(Base.getindex, (state_sym, i)) - ih.offset for (i, symbol) in enumerate(species(rs)))
 end
 
 ##
