@@ -15,3 +15,12 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 Catalyst = "6.12, 7, 8"
+
+[extras]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Distributions", "OrdinaryDiffEq", "SafeTestsets", "Test"]
