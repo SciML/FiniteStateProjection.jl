@@ -1,7 +1,5 @@
 import AbstractAlgebra
 
-netstoichmat(rs::ReactionSystem) = prodstoichmat(rs) - substoichmat(rs)
-
 """ 
     struct FSPSystem{IHT <: AbstractIndexHandler}
         rs::ReactionSystem
