@@ -13,9 +13,6 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
-[compat]
-Catalyst = "6.12, 7, 8"
-
 [extras]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"

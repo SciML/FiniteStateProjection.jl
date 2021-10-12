@@ -16,6 +16,11 @@ export FSPSystem, NaiveIndexHandler, ReducingIndexHandler,
        conservedquantities, conservationlaws,
        reducedspecies, elidedspecies
 
+# Check for Catalyst v9.0
+if isdefined(Catalyst, :reactioncomplexmap)
+    netstoichmat(rn) = Catalyst.netstoichmat(rn)'
+end
+
 abstract type AbstractIndexHandler end
 
 include("fspsystem.jl")
