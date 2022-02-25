@@ -14,8 +14,9 @@ RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-AbstractAlgebra = "0.19, 0.20, 0.21, 0.22, 0.23"
+AbstractAlgebra = "0.19 - 0.23"
 Catalyst = "9, 10"
+DiffEqBase = "6.54 - 6.81"
 MacroTools = "0.5.5, 0.5.6"
 Reexport = "1"
 RuntimeGeneratedFunctions = "0.5"

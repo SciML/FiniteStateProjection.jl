@@ -45,7 +45,7 @@ function build_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; state_sym
 end
 
 function create_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; combinatoric_ratelaw::Bool=true)
-    paramsyms = Symbol.(Catalyst.params(rs))
+    paramsyms = Symbol.(ModelingToolkit.parameters(rs))
     
     return tuple(map(ex -> compile_ratefunc(ex, paramsyms), 
                      build_ratefuncs(rs, ih; state_sym=:idx_in, combinatoric_ratelaw))...)

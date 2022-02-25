@@ -9,7 +9,7 @@ the variable `psym` is an `AbstractVector`.
 See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
 function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
-    param_names = Expr(:tuple, map(par -> par.name, params(sys.rs))...)
+    param_names = Expr(:tuple, map(par -> par.name, ModelingToolkit.parameters(sys.rs))...)
      
     quote 
         $(param_names) = $(psym)
