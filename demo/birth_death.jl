@@ -4,8 +4,6 @@ using PyPlot
 
 ##
 
-@parameters r1 r2
-
 rs = @reaction_network begin
     r1, 0 --> A
     r2, A --> 0
@@ -24,7 +22,7 @@ u0[1] = 1.0
 
 ##
 
-prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, []))
+prob = convert(ODEProblem, sys, u0, 10.0, ps)
 
 ##
 

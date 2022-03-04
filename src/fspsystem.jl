@@ -20,7 +20,7 @@ struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rfs::RT
 end
 
-function FSPSystem(rs::ReactionSystem, ih=NaiveIndexHandler(); combinatoric_ratelaw::Bool=true)
+function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ratelaw::Bool=true)
     rfs = create_ratefuncs(rs, ih; combinatoric_ratelaw=combinatoric_ratelaw)
     FSPSystem(rs, ih, conservationlaws(rs), rfs)
 end

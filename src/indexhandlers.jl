@@ -51,7 +51,7 @@ function LinearIndices end
 
 
 """
-    struct NaiveIndexHandler <: AbstractIndexHandler
+    struct DefaultIndexHandler <: AbstractIndexHandler
         offset::Int
     end
 
@@ -66,30 +66,30 @@ due to the presence of conservation laws. In these cases one should
 use `ReducingIndexHandler`, which will automatically elide species
 where possible.
 
-Constructors: `NaiveIndexHandler([sys::FSPSystem, offset::Int=1])`
-
-See also: [`ReducingIndexHandler`](@ref)
+Constructors: `DefaultIndexHandler([sys::FSPSystem, offset::Int=1])`
 """
-struct NaiveIndexHandler <: AbstractIndexHandler
+struct DefaultIndexHandler <: AbstractIndexHandler
     offset::Int
 end
 
-NaiveIndexHandler() = NaiveIndexHandler(1)
+DefaultIndexHandler() = DefaultIndexHandler(1)
 
-Base.vec(::NaiveIndexHandler, arr) = vec(arr)
-Base.LinearIndices(::NaiveIndexHandler, arr) = LinearIndices(arr)
+@deprecate NaiveIndexHandler DefaultIndexHandler true
 
-function pairedindices(ih::NaiveIndexHandler, arr::AbstractArray{T,N},
+Base.vec(::DefaultIndexHandler, arr) = vec(arr)
+Base.LinearIndices(::DefaultIndexHandler, arr) = LinearIndices(arr)
+
+function pairedindices(ih::DefaultIndexHandler, arr::AbstractArray{T,N},
                        shift::CartesianIndex{N}) where {T,N}
     pairedindices(ih, axes(arr), shift)
 end
 
-function pairedindices(ih::NaiveIndexHandler, dims::NTuple{N,T},
+function pairedindices(ih::DefaultIndexHandler, dims::NTuple{N,T},
                        shift::CartesianIndex{N}) where {N,T<:Number}
     pairedindices(ih, Base.OneTo.(dims), shift)
 end
 
-function pairedindices(::NaiveIndexHandler, dims::NTuple{N,T},
+function pairedindices(::DefaultIndexHandler, dims::NTuple{N,T},
                        shift::CartesianIndex{N}) where {N,T<:AbstractVector}
     ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[i]),
                               min(last(ax), last(ax)+shift[i]))
@@ -101,11 +101,11 @@ function pairedindices(::NaiveIndexHandler, dims::NTuple{N,T},
 end
 
 """
-    getsubstitutions(sys::FSPSystem{NaiveIndexHandler}; state_sym::Symbol)::Dict
+    getsubstitutions(sys::FSPSystem{DefaultIndexHandler}; state_sym::Symbol)::Dict
 
 Defines the abundance of species ``S_i`` to be `state_sym[i] - offset`.
 """
-function getsubstitutions(ih::NaiveIndexHandler, rs::ReactionSystem; state_sym::Symbol)
+function getsubstitutions(ih::DefaultIndexHandler, rs::ReactionSystem; state_sym::Symbol)
     Dict(symbol => Term{Number}(Base.getindex, (state_sym, i)) - ih.offset for (i, symbol) in enumerate(species(rs)))
 end
 
@@ -114,7 +114,7 @@ end
 """
    struct ReducingIndexHandler <: AbstractIndexHandler
 
-More efficient index handler that improves upon [`NaiveIndexHandler`](@ref)
+More efficient index handler that improves upon [`DefaultIndexHandler`](@ref)
 by eliminating variables whose abundances can be computed from other variables
 using conservation laws. Describes the system using a subset of the original
 species which can be obtained via [`reducedspecies`](@ref). Reduces the
@@ -124,7 +124,7 @@ Note: This feature is currently being moved into Catalyst.jl.
 
 Constructors: `ReducingIndexHandler(rs::ReactionSystem[, offset::Int=1])`
 
-See also: [`reducedspecies`](@ref), [`elidedspecies`](@ref), [`NaiveIndexHandler`](@ref)
+See also: [`reducedspecies`](@ref), [`elidedspecies`](@ref), [`DefaultIndexHandler`](@ref)
 """
 struct ReducingIndexHandler <: AbstractIndexHandler
     cons_laws::Matrix{Int}
@@ -133,6 +133,8 @@ struct ReducingIndexHandler <: AbstractIndexHandler
     specs_elided::Vector{Int}
     cons_syms::Vector{Symbol}
 end
+
+@deprecate ReducingIndexHandler DefaultIndexHandler false
 
 function ReducingIndexHandler(rs::ReactionSystem, offset::Int=1)
     cons_laws = conservationlaws(rs)
@@ -225,13 +227,13 @@ end
 """
     getsubstitutions(idxhandler::ReducingIndexHandler, rs::ReactionSystem; state_sym::Symbol)::Dict
 
-Similar to its [`NaiveIndexHandler`](@ref) variant, but computes the abundances of elided species
+Similar to its [`DefaultIndexHandler`](@ref) variant, but computes the abundances of elided species
 from the conserved quantities and the reduced species.
 """
 function getsubstitutions(idxhandler::ReducingIndexHandler, rs::ReactionSystem; state_sym::Symbol)
     symbols = states(rs)
 
-    ret = Dict{Any,Any}(symbols[spec] => Term(Base.getindex, (state_sym, i)) - idxhandler.offset
+    ret = Dict{Any,Any}(symbols[spec] => Term{Number}(Base.getindex, (state_sym, i)) - idxhandler.offset
                                               for (i, spec) in enumerate(reducedspecies(idxhandler)))
 
     elision_dict = elisions(idxhandler, rs)
@@ -260,17 +262,17 @@ end
 """
     pairedindices(idxhandler::ReducingIndexHandler, arr::AbstractArray, shift::CartesianIndex)
 
-Similar to its `NaiveIndexHandler` variant, but converts the indices into indices into
+Similar to its `DefaultIndexHandler` variant, but converts the indices into indices into
 the reduced state space array.
 """
 function pairedindices(idxhandler::ReducingIndexHandler, arr::AbstractArray{T,M},
                        shift::CartesianIndex{N}) where {T,M,N}
     shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
-    pairedindices(NaiveIndexHandler(idxhandler.offset), arr, shift_red)
+    pairedindices(DefaultIndexHandler(idxhandler.offset), arr, shift_red)
 end
 
 function pairedindices(idxhandler::ReducingIndexHandler, dims::NTuple{M},
                        shift::CartesianIndex{N}) where {M,N}
     shift_red = CartesianIndex{M}(convert(Tuple, shift)[reducedspecies(idxhandler)]...)
-    pairedindices(NaiveIndexHandler(idxhandler.offset), dims, shift_red)
+    pairedindices(DefaultIndexHandler(idxhandler.offset), dims, shift_red)
 end

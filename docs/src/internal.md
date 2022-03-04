@@ -32,12 +32,7 @@ LinearIndices
 
 ### Built-in implementations
 ```@docs
-elidedspecies(::AbstractMatrix{Int})
-elisions
-getsubstitutions(::NaiveIndexHandler, ::ReactionSystem)
-getsubstitutions(::ReducingIndexHandler, ::ReactionSystem)
-build_rhs_header(::FSPSystem{ReducingIndexHandler})
-pairedindices(::ReducingIndexHandler, ::AbstractArray, ::CartesianIndex)
+getsubstitutions(::DefaultIndexHandler, ::ReactionSystem)
 ```
 
 ## Function Building

@@ -4,11 +4,10 @@ using PyPlot
 
 ##
 
-@parameters r1 r2 r3 r4
-
 rs = @reaction_network begin
-    r1, G_on --> G_on + M
-    (r2, r3), G_on <--> G_off
+    r1 * (1 - G_on), 0 --> G_on
+    r2, G_on --> 0
+    r3, G_on --> G_on + M
     r4, M --> 0
 end r1 r2 r3 r4
 
@@ -16,11 +15,8 @@ end r1 r2 r3 r4
 
 sys = FSPSystem(rs)
 
-# There is one conserved quantity: G_on + G_off
-cons = conservedquantities([1,0,0], sys)
-
 # Parameters for our system
-ps = [ 15.0, 0.25, 0.15, 1.0 ]
+ps = [ 0.25, 0.15, 15.0, 1.0 ]
 
 # Initial values
 # Since G_on + G_off = const. we do not have to model the two
@@ -37,7 +33,7 @@ u0[1,1] = 1.0
 
 ##
 
-prob = convert(ODEProblem, DefaultIndexHandler(sys, 1), sys, u0, 10.0, (ps, cons))
+prob = convert(ODEProblem, sys, u0, 10.0, ps)
 
 ##
 

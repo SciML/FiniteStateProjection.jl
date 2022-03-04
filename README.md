@@ -18,7 +18,6 @@ More information is available in the [documentation](https://kaandocal.github.io
 using FiniteStateProjection
 using OrdinaryDiffEq
 
-@parameters σ d
 rn = @reaction_network begin
     σ, 0 --> A
     d, A --> 0
@@ -29,12 +28,13 @@ sys = FSPSystem(rn)
 # Parameters for our system
 ps = [ 10.0, 1.0 ]
 
-# Initial values
+# Initial distribution (over 1 species)
+# Here we start with 0 copies of A
 u0 = zeros(50)
-u0[1] = 1.0
+u0[1] = 1.0 
 
 prob = ODEProblem(sys, u0, (0, 10.0), ps)
-sol = solve(prob, Vern7(), atol=1e-6)
+sol = solve(prob, Vern7())
 ```
 ![Visualisation](docs/src/assets/birth_death.png)
 
@@ -43,30 +43,25 @@ sol = solve(prob, Vern7(), atol=1e-6)
 using FiniteStateProjection
 using OrdinaryDiffEq
 
-@parameters ρ σ_on σ_off d
 rn = @reaction_network begin
+    σ_on * (1 - G_on), 0 --> G_on
+    σ_off, G_on --> 0
     ρ, G_on --> G_on + M
-    (σ_on, σ_off), G_off <--> G_on
     d, M --> 0
-end ρ σ_on σ_off d
+end σ_on σ_off ρ d
 
-# This automatically reduces the dimensionality of the
-# network by exploiting conservation laws
-ih = ReducingIndexHandler(rn)
-sys = FSPSystem(rn, ih)
-
-# There is one conserved quantity: G_on + G_off
-cons = conservedquantities([1, 0, 0], sys)
+sys = FSPSystem(rn)
 
 # Parameters for our system
-ps = [ 15.0, 0.25, 0.15, 1.0 ]
+ps = [ 0.25, 0.15, 15.0, 1.0 ]
 
-# In the reduced model, G_off = 1 - G_on does not have to be tracked
+# Initial distribution (over two species)
+# Here we start with 0 copies of G_on and M
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = ODEProblem(sys, u0, (0, 10.0), (ps, cons))
-sol = solve(prob, Vern7(), atol=1e-6)
+prob = ODEProblem(sys, u0, (0, 10.0), ps)
+sol = solve(prob, Vern7())
 ```
 ![Visualisation](docs/src/assets/telegraph.png)
 
