@@ -8,13 +8,12 @@ Constructor: `FSPSystem(rs::ReactionSystem[, ih=DefaultIndexHandler(); combinato
 struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rs::ReactionSystem
     ih::IHT
-    cons_laws::Matrix{Int}
     rfs::RT
 end
 
 function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ratelaw::Bool=true)
     rfs = create_ratefuncs(rs, ih; combinatoric_ratelaw=combinatoric_ratelaw)
-    FSPSystem(rs, ih, conservationlaws(rs), rfs)
+    FSPSystem(rs, ih, rfs)
 end
 
 """ 
@@ -47,55 +46,3 @@ function compile_ratefunc(ex_rf, params)
     ex = :((idx_in, t, $(params...)) -> $(ex_rf)) |> MacroTools.flatten
     @RuntimeGeneratedFunction(ex)
 end
-
-
-""" 
-    conservationlaws(rs::ReactionSystem)
-    conservationlaws(netstoichmat::AbstractMatrix{Int})
-
-Given the net stoichiometry matrix of a reaction system, computes a matrix
-of conservation laws (each represented as a row in the output). 
-"""
-function conservationlaws(nsm::AbstractMatrix{Int})::Matrix{Int}
-    n_reac, n_spec = size(nsm)
-    
-    # We basically have to compute the left null space of the matrix
-    # over the integers; this is best done using its Smith Normal Form.
-    nsm_conv = AbstractAlgebra.matrix(AbstractAlgebra.ZZ, nsm)
-    S, T, U = AbstractAlgebra.snf_with_transform(nsm_conv)
-    
-    # Zero columns of S (which occur after nonzero columns in SNF)
-    # correspond to conserved quantities
-    n = findfirst(i -> all(S[:,i] .== 0), 1:n_spec)
-    if n === nothing
-        return zeros(Int, 0, n_spec)
-    end
-    
-    ret = Matrix(U[:,n:end]')
-    
-    # If all coefficients for a conservation law are negative
-    # we might as well flip them to become positive
-    for i in 1:size(ret,1)
-        all(ret[i,:] .<= 0) && (ret[i,:] .*= -1)
-    end
-    
-    ret
-end
-
-conservationlaws(rs::ReactionSystem) = conservationlaws(netstoichmat(rs))
-
-"""
-    conservationlaws(sys::FSPSystem)::Matrix{Int}
-
-Returns matrix of conservation laws associated with the system. Each row of 
-the matrix contains the stoichiometric coefficients of a different conserved quantity.
-"""
-conservationlaws(sys::FSPSystem) = sys.cons_laws
-
-"""
-    conservedquantities(state, sys)
-
-Compute conserved quantities for the system at the given state.
-"""
-conservedquantities(state::AbstractVector, sys) = conservationlaws(sys) * state
-

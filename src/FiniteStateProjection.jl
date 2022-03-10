@@ -15,11 +15,6 @@ RuntimeGeneratedFunctions.init(@__MODULE__)
 
 export FSPSystem, DefaultIndexHandler, SteadyState
 
-# Check for Catalyst v9.0 or higher
-if isdefined(Catalyst, :reactioncomplexmap)
-    netstoichmat(rn) = Catalyst.netstoichmat(rn)'
-end
-
 abstract type AbstractIndexHandler end
 
 include("fspsystem.jl")

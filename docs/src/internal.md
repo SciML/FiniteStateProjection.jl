@@ -3,11 +3,6 @@
 CurrentModule = FiniteStateProjection
 ```
 
-## Reaction Systems
-```@docs
-conservationlaws(::AbstractMatrix{Int})
-```
-
 ## [Index Handlers](@id index_handlers_internal)
 
 ### Index Handler Interface
