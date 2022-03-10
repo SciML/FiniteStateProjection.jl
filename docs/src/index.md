@@ -12,14 +12,13 @@ FiniteStateProjection.jl works by converting a `ReactionSystem` into a function 
 
 ``\frac{\mathrm{d}}{\mathrm{d} t} P(t) = A P(t)``
 
-This function is generated dynamically as an `ODEFunction` for use with DifferentialEquations.jl and specialised for each `ReactionSystem`. Users can use their preferred array types and provide additional features by overloading the functions in this package. Alternatively the matrix `A` can be constructed as a `SparseMatrixCSC`.
+This function is generated dynamically as an `ODEFunction` for use with DifferentialEquations.jl and specialised for each `ReactionSystem`. Users can use their preferred array types and provide additional features by overloading the functions in this package. Alternatively the matrix `A` can be constructed as a `SparseMatrixCSC`. FiniteStateProjection.jl supports both the time-dependent Chemical Master Equation and its steady-state version.
 
 ## Features
 - Built on top of [Catalyst.jl](https://github.com/SciML/Catalyst.jl)
 - FSP equations are generated as `ODEFunction`/`ODEProblem`s and can be solved with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl), with on-the-fly generation of targeted functions for improved performance
 - The Chemical Master Equation can be generated as a `SparseMatrixCSC`
 - Flexible API for user-defined array types via `IndexHandler`s
-- Automatic dimensionality reduction for systems with conserved quantities
 
 ## Acknowledgments
 

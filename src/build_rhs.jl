@@ -4,12 +4,12 @@
 Returns code unpacking the parameters of the system from the symbol
 `psym` in the form `(p1, p2, ...) = psym`. This should be called in
 all overloads of [`build_rhs_header`](@ref). It is assumed that
-the variable `psym` is an `AbstractVector`.
+the variable `psym` represents an `AbstractVector`.
 
 See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
 function unpackparams(sys::FSPSystem, psym::Symbol)
-    param_names = Expr(:tuple, map(par -> par.name, ModelingToolkit.parameters(sys.rs))...)
+    param_names = Expr(:tuple, map(par -> par.name, Catalyst.parameters(sys.rs))...)
      
     quote 
         $(param_names) = $(psym)
@@ -17,7 +17,7 @@ function unpackparams(sys::FSPSystem, psym::Symbol)
 end
 
 """
-    build_rhs_header(idxhandler::AbstractIndexHandler, sys::FSPSystem)
+    build_rhs_header(sys::FSPSystem)
 
 Return initialisation code for the RHS function, unpacking the parameters
 `p` supplied by `DifferentialEquations`. The default implementation
@@ -35,7 +35,7 @@ end
 ##
 
 """
-    build_rhs_firstpass(sys::FSPSystem, rfs)
+    build_rhs_firstpass(sys::FSPSystem)
 
 Return code for the first pass of the RHS function, for the time-dependent
 FSP. Goes through all reactions and computes the negative part of the CME
@@ -121,8 +121,7 @@ end
 ##
 
 """
-    convert(::Type{ODEFunction}, sys::FSPSystem;
-            combinatoric_ratelaw::Bool=true)
+    Base.convert(::Type{ODEFunction}, sys::FSPSystem)
 
 Return an `ODEFunction` defining the right-hand side of the CME.
 
@@ -131,20 +130,15 @@ the work in the package happens; for best performance it is suggested to build a
 once for a given reaction system and reuse it instead of directly converting
 a reaction system to an `ODEProblem` (which implicitly calls this function).
 """
-function Base.convert(::Type{ODEFunction}, sys::FSPSystem;
-                      combinatoric_ratelaw::Bool=true)::ODEFunction
-    rhs = build_rhs(sys)
-    ODEFunction{true}(rhs)
-end
+Base.convert(::Type{ODEFunction}, sys::FSPSystem) = ODEFunction{true}(build_rhs(sys))
 
 """
-    convert(::Type{ODEProblem}, sys::FSPSystem, u0, tmax[, p])
+    Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tmax[, p])
 
 Return an `ODEProblem` for use in `DifferentialEquations`. This function implicitly
 calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction` 
 first and then use that to create `ODEProblem`s.
 """
-function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, p=NullParameters();
-                      combinatoric_ratelaw::Bool=true)
-     ODEProblem(convert(ODEFunction, sys), u0, tint, p; combinatoric_ratelaw)
+function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, p=NullParameters())
+    ODEProblem(convert(ODEFunction, sys), u0, tint, p)
 end

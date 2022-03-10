@@ -18,8 +18,7 @@ function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ra
 end
 
 """ 
-    build_ratefuncs(rs, ih; 
-                    state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
+    build_ratefuncs(rs, ih; state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector
 
 Return the rate functions converted to Julia expressions in the state variable 
 `state_sym`. Abundances of the species are computed using `getsubstitutions`.
@@ -37,7 +36,7 @@ function build_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; state_sym
 end
 
 function create_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; combinatoric_ratelaw::Bool=true)
-    paramsyms = Symbol.(ModelingToolkit.parameters(rs))
+    paramsyms = Symbol.(Catalyst.parameters(rs))
     
     return tuple(map(ex -> compile_ratefunc(ex, paramsyms), 
                      build_ratefuncs(rs, ih; state_sym=:idx_in, combinatoric_ratelaw))...)
@@ -51,8 +50,8 @@ end
 
 
 """ 
-    conservationlaws(rs::ReactionSystem)::Matrix{Int}
-    conservationlaws(netstoichmat::AbstractMatrix{Int})::Matrix{Int}
+    conservationlaws(rs::ReactionSystem)
+    conservationlaws(netstoichmat::AbstractMatrix{Int})
 
 Given the net stoichiometry matrix of a reaction system, computes a matrix
 of conservation laws (each represented as a row in the output). 
