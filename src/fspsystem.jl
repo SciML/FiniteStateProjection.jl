@@ -1,17 +1,9 @@
 import AbstractAlgebra
 
 """ 
-    struct FSPSystem{IHT <: AbstractIndexHandler}
-        rs::ReactionSystem
-        ih::IHT
-        cons_laws::Matrix{Int}
-    end
+Thin wrapper around `Catalyst.ReactionSystem` for use with this package. 
 
-Thin wrapper around `ModelingToolkit.ReactionSystem` for use with this package. 
-Automatically computes a matrix of conservation laws (see 
-[`conservationlaws`](@ref)). 
-
-Constructor: `FSPSystem(rs::ReactionSystem)`
+Constructor: `FSPSystem(rs::ReactionSystem[, ih=DefaultIndexHandler(); combinatoric_ratelaw::Bool=true])`
 """
 struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rs::ReactionSystem

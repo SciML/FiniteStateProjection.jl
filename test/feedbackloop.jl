@@ -2,6 +2,7 @@
 
 using Test
 using OrdinaryDiffEq
+using SteadyStateDiffEq
 using FiniteStateProjection
 using SparseArrays
 
@@ -58,3 +59,32 @@ solA = solve(prob, Vern7(), atol=1e-9, rtol=1e-6, saveat=tt)
 @test sol.u[1] ≈ solA.u[1] atol=1e-4
 @test sol.u[2] ≈ solA.u[2] atol=1e-4
 @test sol.u[3] ≈ solA.u[3] atol=1e-4
+
+## Steady-State Tests
+
+function create_A_ss(ps, Nmax)
+    A = create_A(ps, Nmax)
+
+    for i in 1:size(A, 1)
+        A[i,i] -= sum(A[:,i])
+    end
+
+    A
+end
+
+A_ss = create_A_ss(ps, Nmax)
+A_fsp_ss = convert(SparseMatrixCSC, sys, (2, Nmax), ps, SteadyState())
+
+@test A_ss ≈ A_fsp_ss
+
+prob = convert(SteadyStateProblem, sys, u0, ps)
+sol = solve(prob, SSRootfind())
+sol.u ./= sum(sol.u)
+
+f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
+
+probA = SteadyStateProblem(f, u0)
+solA = solve(prob, SSRootfind())
+solA.u ./= sum(solA.u)
+
+@test sol.u ≈ solA.u atol=1e-4

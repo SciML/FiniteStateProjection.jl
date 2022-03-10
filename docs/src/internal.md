@@ -43,3 +43,9 @@ build_ratefuncs
 build_rhs_firstpass
 build_rhs_secondpass
 ```
+
+## Steady-State Functions
+```@docs
+build_rhs_ss
+build_rhs_singlepass_ss
+```

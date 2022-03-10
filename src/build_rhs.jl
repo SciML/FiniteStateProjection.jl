@@ -8,7 +8,7 @@ the variable `psym` is an `AbstractVector`.
 
 See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
-function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
+function unpackparams(sys::FSPSystem, psym::Symbol)
     param_names = Expr(:tuple, map(par -> par.name, ModelingToolkit.parameters(sys.rs))...)
      
     quote 
@@ -17,7 +17,7 @@ function unpackparams(sys::FSPSystem, psym::Symbol)::Expr
 end
 
 """
-    build_rhs_header(idxhandler::AbstractIndexHandler, sys::FSPSystem)::Expr
+    build_rhs_header(idxhandler::AbstractIndexHandler, sys::FSPSystem)
 
 Return initialisation code for the RHS function, unpacking the parameters
 `p` supplied by `DifferentialEquations`. The default implementation
@@ -25,7 +25,7 @@ just unpacks parameters from `p`.
 
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
-function build_rhs_header(sys::FSPSystem)::Expr
+function build_rhs_header(sys::FSPSystem)
     quote 
         ps = p
         $(unpackparams(sys, :ps))
@@ -35,7 +35,7 @@ end
 ##
 
 """
-    build_rhs_firstpass(sys::FSPSystem, rfs)::Expr
+    build_rhs_firstpass(sys::FSPSystem, rfs)
 
 Return code for the first pass of the RHS function, for the time-dependent
 FSP. Goes through all reactions and computes the negative part of the CME
@@ -61,7 +61,7 @@ end
 ##
 
 """
-    build_rhs_secondpass(sys::FSPSystem)::Expr
+    build_rhs_secondpass(sys::FSPSystem)
 
 Return code for the second pass of the RHS function. Goes through
 all reactions and computes the positive part of the CME (probability
@@ -71,7 +71,7 @@ random memory access reactions are processed one by one.
 
 See also: [`build_rhs`](@ref)
 """
-function build_rhs_secondpass(sys::FSPSystem)::Expr
+function build_rhs_secondpass(sys::FSPSystem)
     isempty(sys.rfs) && return quote end
 
     S = netstoichmat(sys.rs)
@@ -121,7 +121,7 @@ end
 ##
 
 """
-    convert(::Type{ODEFunction}, idxhandler::AbstractIndexHandler, sys::FSPSystem;
+    convert(::Type{ODEFunction}, sys::FSPSystem;
             combinatoric_ratelaw::Bool=true)
 
 Return an `ODEFunction` defining the right-hand side of the CME.
@@ -138,13 +138,13 @@ function Base.convert(::Type{ODEFunction}, sys::FSPSystem;
 end
 
 """
-    convert(::Type{ODEProblem}, idxhandler::AbstractIndexHandler, sys::FSPSystem, u0, tmax, p)
+    convert(::Type{ODEProblem}, sys::FSPSystem, u0, tmax[, p])
 
-Return an `ODEProblem` for use in `DifferentialEquations. This function implicitly
-calls `convert(ODEFunction, indexhandler, sys)`. It is usually more efficient to
-create an `ODEFunction` first and then use that to create `ODEProblem`s.
+Return an `ODEProblem` for use in `DifferentialEquations`. This function implicitly
+calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction` 
+first and then use that to create `ODEProblem`s.
 """
-function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, p;
-                      combinatoric_ratelaw::Bool=true)::ODEProblem
+function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, p=NullParameters();
+                      combinatoric_ratelaw::Bool=true)
      ODEProblem(convert(ODEFunction, sys), u0, tint, p; combinatoric_ratelaw)
 end

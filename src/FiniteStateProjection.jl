@@ -6,17 +6,16 @@ using Reexport
 using ModelingToolkit
 using MacroTools
 using SparseArrays
+using DocStringExtensions
 
 import Base: LinearIndices, vec
 
 using RuntimeGeneratedFunctions
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
-export FSPSystem, DefaultIndexHandler, 
-       conservedquantities, conservationlaws,
-       reducedspecies, elidedspecies
+export FSPSystem, DefaultIndexHandler, SteadyState
 
-# Check for Catalyst v9.0
+# Check for Catalyst v9.0 or higher
 if isdefined(Catalyst, :reactioncomplexmap)
     netstoichmat(rn) = Catalyst.netstoichmat(rn)'
 end
@@ -26,6 +25,7 @@ abstract type AbstractIndexHandler end
 include("fspsystem.jl")
 include("indexhandlers.jl")
 include("build_rhs.jl")
+include("build_rhs_ss.jl")
 include("matrix.jl")
 
 end
