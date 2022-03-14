@@ -1,5 +1,3 @@
-import AbstractAlgebra
-
 """ 
 Thin wrapper around `Catalyst.ReactionSystem` for use with this package. 
 

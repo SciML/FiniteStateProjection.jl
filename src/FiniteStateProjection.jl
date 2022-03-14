@@ -3,10 +3,8 @@ module FiniteStateProjection
 using Reexport
 @reexport using Catalyst
 
-using ModelingToolkit
 using MacroTools
 using SparseArrays
-using DocStringExtensions
 
 import Base: LinearIndices, vec
 
