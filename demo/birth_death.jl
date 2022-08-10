@@ -26,7 +26,7 @@ prob = convert(ODEProblem, sys, u0, 10.0, ps)
 
 ##
 
-sol = solve(prob, Vern7(), dense=false, save_everystep=false, atol=1e-6)
+sol = solve(prob, Vern7(), dense=false, save_everystep=false, abstol=1e-6)
 
 ##
 
