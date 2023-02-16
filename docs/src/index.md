@@ -8,7 +8,11 @@ CurrentModule=FiniteStateProjection
 
 FiniteStateProjection.jl is a package that implements Finite State Projection algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit](https://github.com/SciML/ModelingToolkit.jl). FiniteStateProjection.jl converts descriptions of reaction networks into `ODEProblem`s that can be used to compute approximate solutions of the Chemical Master Equation with packages such as [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
 
-FiniteStateProjection.jl works by converting a `ReactionSystem` into a function that computes the right-hand side of the Chemical Master Equation:
+The Chemical Master Equation allows us to compute the probability of a reaction system to be in a given state ``\vec n`` at a time ``t``. The state of a system with ``s`` species is described by a vector ``\vec n = (n_1, n_2, \ldots, n_s)`` of length ``s``, where ``n_1, n_2, \ldots`` are the abundances of the different species. The reaction system itself can be represented by an ``s``-dimensional array ``P[n_1,\ldots,n_s]`` that describes the probability of the system being in state ``(n_1,\ldots,n_s)``. Here ``P`` depends on time as the system evolves. Given initial conditions ``P(0)``, the time evolution of ``P`` is given by the Chemical Master Equation, which is a set of linear ODEs that can be solved numerically to predict the probability distribution of the system in the future. 
+
+Since the number of states for a system can be infinite, the Finite State Projection approximates the Chemical Master Equation by only considering a finite number of states, namely those which are most probable. There are various ways to truncate the state space, but the most common is to provide an upper limit for each species, that is, to require ``n_1 < M_1``, ``n_2 < M_2``, etc. for fixed thresholds ``M_1, M_2, \ldots``. The number of states considered will be ``M_1 \times M_2 \times \ldots \times M_s``, and ``P`` can be represented as an array with those dimensions. While truncating the CME allows us to solve the equations numerically, the amount of space required to store ``P`` increases quickly as more species are added. 
+
+FiniteStateProjection.jl works by converting a `ReactionSystem` into a function that computes the right-hand side of the (truncated) Chemical Master Equation:
 
 ``\frac{\mathrm{d}}{\mathrm{d} t} P(t) = A P(t)``
 

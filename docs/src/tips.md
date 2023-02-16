@@ -21,13 +21,14 @@ using Sundials
 sol = solve(prob, CVODE_BDF(linear_solver=:GMRES), atol=1e-6) # very fast
 ```
 
-For time-homogeneous systems where the right-hand side of the CME does not depend on `t`, solving the FSP is equivalent to computing the exponential-vector product `exp(A .* t) * u0`, where `A` is the evolution operator. This can be done very efficiently using the `expmv` function provided by [Expokit.jl](https://github.com/acroy/Expokit.jl):
-```
+For time-homogeneous systems where the right-hand side of the CME does not depend on `t`, solving the FSP is equivalent to computing the exponential-vector product `exp(A .* t) * vec(u0)`, where `A` is the evolution operator. Here we use the `vec` function to flatten the state space into a vector that can be multiplied by the matrix `A`. We can compute the solution very efficiently using the `expmv` function provided by [Expokit.jl](https://github.com/acroy/Expokit.jl):
+```julia
 using Expokit
 
 (...)
 
-ut = expmv(t, A, u0, tol=1e-6)  # really fast
+ut = similar(u0)
+expmv!(vec(ut), t, A, vec(u0), tol=1e-6)  # really fast
 ```
 
 ## Further Comments

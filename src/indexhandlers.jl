@@ -100,6 +100,12 @@ function pairedindices(::DefaultIndexHandler, dims::NTuple{N,T},
     zip(CartesianIndices(ranges_shifted), CartesianIndices(ranges))
 end
 
+function pairedindices(::DefaultIndexHandler, dims::NTuple{N,T},
+                       shift::CartesianIndex{M}) where {N,M,T<:AbstractVector}
+    @error "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
+end
+
+
 """
     getsubstitutions(sys::FSPSystem{DefaultIndexHandler}; state_sym::Symbol)::Dict
 
