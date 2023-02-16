@@ -4,7 +4,7 @@ Solving the Chemical Master Equation numerically is a difficult task and errors 
 
 ## Ensure your state space has the right dimension
 
-If your are solving an SIR model with three species, ``S``, ``I`` and ``R``, your state space will be 3-dimensional. FiniteStateProjection.jl computes probabilities for all states simultaneously and stores the results in a 3-dimensional array. In particular, `u0` must have type `Float64` (or similar).
+If your are solving an SIR model with three species, ``S``, ``I`` and ``R``, your state space will be 3-dimensional. FiniteStateProjection.jl computes probabilities for all states simultaneously and stores the results in a 3-dimensional array. In particular, `u0` must have type `Float64` or similar as it represents numbers between 0 and 1.
 
 ```julia
 # correct
@@ -19,7 +19,7 @@ u0 = [99,1,0]               # wrong type (Int) and shape (1D)
 
 A common reason for the solver returning nonsensical solutions is a state space that is too small. Since the Finite State Projection works with a finite-dimensional approximation of the system, the number of states considered can have a large impact on accuracy. The loss of accuracy due to using a smaller state space is the truncation error.
 
-A good way to check whether your state space is large enough is to solve the CME until the required time ``t`` and to sum up the probabilities for each state - this gives the probability that the system will have remained in the truncated state space from start to end. If this quantity is noticeably less than 1, the state space is likely too small. As an informal rule of thumb, a value of less than ``95\%`` indicates that the solution will not be reliable.
+A good way to check whether your state space is large enough is to solve the CME until the required time ``t`` and to sum up the probabilities for each state - this gives the probability that the system will have remained in the truncated state space from start to end. If this quantity is noticeably less than 1, the state space is likely too small. As an informal rule of thumb, a value of less than 95% indicates that the solution will not be reliable.
 
 ```julia
 # always true
@@ -53,9 +53,10 @@ Here the propensity function for the first reaction will negative if ``I > N``, 
 u0 = zeros(30)
 u0[2] = 1
 
-prob_fsp = convert(ODEProblem, sys_fsp, u0, (0, 100.), [ 1., 1., 20 ])      # N is too small for the state space!
+# N is too small for the state space!
+prob_fsp = convert(ODEProblem, sys_fsp, u0, (0, 100.), [ 1., 1., 20 ])
 ```
 
 ## Ensure you are using the right solver
 
-The Chemical Master Equation is generally very stiff and requires a solver that can handle this stiffness, see [Tips & Tricks](@ref tips). If your solver fails, first check if any of the above points apply. You may be able to get a different solver to work; this requires some experimentation. Anecdotally some systems, particularly oscillatory ones such as the Schlögl model, can pose significant challenges to most solvers and take inordinate amounts of time to solve. I am not aware of any solutions for this issue and would appreciate any tips for getting such systems to work (please consider opening an issue on GitHub if you encounter such examples).
+The Chemical Master Equation is generally very stiff and requires a solver that can handle this stiffness, see [Tips & Tricks](@ref tips). If your solver fails, first check if any of the above points apply. You may be able to get a different solver to work; this requires some experimentation. Anecdotally some systems, particularly oscillatory ones such as the Schlögl model, can pose significant challenges to most solvers and take inordinate amounts of time to solve. I am not aware of any solutions for this at the moment, but please consider opening an issue on GitHub if you encounter examples of this sort.
