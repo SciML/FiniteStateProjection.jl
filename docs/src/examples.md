@@ -9,9 +9,10 @@ using FiniteStateProjection
 using OrdinaryDiffEq
 
 rn = @reaction_network begin
+    @parameters σ d
     σ, 0 --> A
     d, A --> 0
-end σ d
+end
 
 sys = FSPSystem(rn)
 
@@ -43,11 +44,12 @@ using FiniteStateProjection
 using OrdinaryDiffEq
 
 rn = @reaction_network begin
+    @parameters σ_on σ_off ρ d
     σ_on * (1 - G_on), 0 --> G_on
     σ_off, G_on --> 0
     ρ, G_on --> G_on + M
     d, M --> 0
-end σ_on σ_off ρ d
+end
 
 sys = FSPSystem(rn)
 
