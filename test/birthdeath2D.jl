@@ -9,13 +9,13 @@ using Sundials
 
 marg(vec; dims) = dropdims(sum(vec; dims); dims)
 
-@parameters r1, r2, s1, s2
 rs = @reaction_network begin
+    @parameters r1 r2 s1 s2
     r1, 0 --> A
     r2, A --> 0
     s1, 0 --> B
     s2, B --> 0
-end r1 r2 s1 s2
+end
 
 sys = FSPSystem(rs)
 
@@ -54,8 +54,7 @@ solA = solve(prob, Vern7(), abstol=1e-9, reltol=1e-6, saveat=tt)
 ## Steady-State Tests
 
 prob = convert(SteadyStateProblem, sys, u0, ps)
-sol = solve(prob, SSRootfind())
-sol.u ./= sum(sol.u)
+sol = solve(prob, DynamicSS(CVODE_BDF()), dt=1.0)
 
 @test marg(sol.u, dims=2) ≈ pdf.(Poisson(ps[1] / ps[2]), 0:Nmax) atol=1e-4
 @test marg(sol.u, dims=1) ≈ pdf.(Poisson(ps[3] / ps[4]), 0:Nmax) atol=1e-4
@@ -64,7 +63,6 @@ A = convert(SparseMatrixCSC, sys, (Nmax+1, Nmax+1), ps, SteadyState())
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
 probA = SteadyStateProblem(f, u0)
-solA = solve(probA, SSRootfind())
-solA.u ./= sum(solA.u)
+solA = solve(probA, DynamicSS(CVODE_BDF()), dt=1.0)
 
 @test sol.u ≈ solA.u atol=1e-4

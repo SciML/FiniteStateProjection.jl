@@ -5,16 +5,16 @@ using OrdinaryDiffEq
 using SteadyStateDiffEq
 using FiniteStateProjection
 using SparseArrays
-
-@parameters σ_off σ_on ρ_on ρ_off d
+using Sundials
 
 rs = @reaction_network begin
+	@parameters σ_off σ_on ρ_on ρ_off d
 	σ_off, G + P → 0
 	σ_on * (1 - G), 0 ⇒ G + P
 	ρ_on, G → G + P
 	ρ_off * (1-G), 0 ⇒ P
 	d, P → 0
-end σ_off σ_on ρ_on ρ_off d
+end
 
 ps = [ 1, 0.1, 20, 1, 1]
 Nmax = 200
@@ -78,13 +78,11 @@ A_fsp_ss = convert(SparseMatrixCSC, sys, (2, Nmax), ps, SteadyState())
 @test A_ss ≈ A_fsp_ss
 
 prob = convert(SteadyStateProblem, sys, u0, ps)
-sol = solve(prob, SSRootfind())
-sol.u ./= sum(sol.u)
+sol = solve(prob, DynamicSS(CVODE_BDF()), dt=1.0)
 
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
 probA = SteadyStateProblem(f, u0)
-solA = solve(prob, SSRootfind())
-solA.u ./= sum(solA.u)
+solA = solve(probA, DynamicSS(CVODE_BDF()), dt=1.0)
 
 @test sol.u ≈ solA.u atol=1e-4
