@@ -9,18 +9,17 @@ using Sundials
 
 marg(vec; dims) = dropdims(sum(vec; dims); dims)
 
-@parameters r1, r2, s1, s2
 rs = @reaction_network begin
     r1, 0 --> A
     r2, A --> 0
     s1, 0 --> B
     s2, B --> 0
-end r1 r2 s1 s2
+end
 
 sys = FSPSystem(rs)
 
 prs = exp.(2 .* rand(2))
-ps = [ prs[1], prs[1] / exp(4 * rand()), 
+ps = [ prs[1], prs[1] / exp(4 * rand()),
        prs[2], prs[2] / exp(4 * rand()) ]
 
 Nmax = 130

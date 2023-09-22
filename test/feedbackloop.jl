@@ -6,15 +6,13 @@ using SteadyStateDiffEq
 using FiniteStateProjection
 using SparseArrays
 
-@parameters σ_off σ_on ρ_on ρ_off d
-
 rs = @reaction_network begin
 	σ_off, G + P → 0
 	σ_on * (1 - G), 0 ⇒ G + P
 	ρ_on, G → G + P
 	ρ_off * (1-G), 0 ⇒ P
 	d, P → 0
-end σ_off σ_on ρ_on ρ_off d
+end
 
 ps = [ 1, 0.1, 20, 1, 1]
 Nmax = 200
