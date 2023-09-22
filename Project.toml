@@ -10,7 +10,6 @@ MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-SteadyStateDiffEq = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 
 [compat]
 Catalyst = "13"
