@@ -11,7 +11,7 @@ end
 
 function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ratelaw::Bool=true)
     isempty(Catalyst.get_systems(rs)) ||
-        error("Supported Catalyst models can not contain subsystems. Please use `rs = Catalyst.flatten(rs::ReactionSystem)` to generate a single system with no subsystems from you Catalyst model.")
+        error("Supported Catalyst models can not contain subsystems. Please use `rs = Catalyst.flatten(rs::ReactionSystem)` to generate a single system with no subsystems from your Catalyst model.")
     any(eq -> !(eq isa Reaction), equations(rs)) &&
         error("Catalyst models that include constraint ODEs or algebraic equations are not supported.")
 
