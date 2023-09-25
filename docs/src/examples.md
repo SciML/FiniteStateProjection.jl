@@ -11,7 +11,7 @@ using OrdinaryDiffEq
 rn = @reaction_network begin
     σ, 0 --> A
     d, A --> 0
-end σ d
+end
 
 sys = FSPSystem(rn)
 
@@ -21,7 +21,7 @@ ps = [ 10.0, 1.0 ]
 # Initial distribution (over 1 species)
 # Here we start with 0 copies of A
 u0 = zeros(50)
-u0[1] = 1.0 
+u0[1] = 1.0
 
 prob = ODEProblem(sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())
@@ -47,7 +47,7 @@ rn = @reaction_network begin
     σ_off, G_on --> 0
     ρ, G_on --> G_on + M
     d, M --> 0
-end σ_on σ_off ρ d
+end
 
 sys = FSPSystem(rn)
 

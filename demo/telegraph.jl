@@ -9,7 +9,7 @@ rs = @reaction_network begin
     r2, G_on --> 0
     r3, G_on --> G_on + M
     r4, M --> 0
-end r1 r2 r3 r4
+end
 
 ##
 
@@ -20,9 +20,9 @@ ps = [ 0.25, 0.15, 15.0, 1.0 ]
 
 # Initial values
 # Since G_on + G_off = const. we do not have to model the two
-# separately. Use reduced_species(sys) to get the list of 
+# separately. Use reduced_species(sys) to get the list of
 # species we actually have to model:
-# 
+#
 # julia> reduced_species(sys)
 # 2-element Vector{Int64}:
 #  1
