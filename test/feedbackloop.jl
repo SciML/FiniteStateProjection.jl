@@ -47,12 +47,12 @@ u0 = zeros(2, Nmax)
 u0[1] = 1.0
 
 prob = convert(ODEProblem, sys, u0, maximum(tt), ps)
-sol = solve(prob, Vern7(), abstol=1e-9, reltol=1e-6, saveat=tt)
+sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 f = (du,u,t) -> mul!(du, A, u)
 
 probA = ODEProblem(f, u0, 10.0)
-solA = solve(prob, Vern7(), abstol=1e-9, reltol=1e-6, saveat=tt)
+solA = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 @test sol.u[1] ≈ solA.u[1] atol=1e-4
 @test sol.u[2] ≈ solA.u[2] atol=1e-4
