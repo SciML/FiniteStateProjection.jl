@@ -7,7 +7,7 @@ using PyPlot
 rs = @reaction_network begin
     r1, 0 --> A
     r2, A --> 0
-end r1 r2
+end
 
 ##
 

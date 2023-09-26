@@ -6,15 +6,13 @@ using SteadyStateDiffEq
 using FiniteStateProjection
 using SparseArrays
 
-@parameters σ_off σ_on ρ_on ρ_off d
-
 rs = @reaction_network begin
 	σ_off, G + P → 0
 	σ_on * (1 - G), 0 ⇒ G + P
 	ρ_on, G → G + P
 	ρ_off * (1-G), 0 ⇒ P
 	d, P → 0
-end σ_off σ_on ρ_on ρ_off d
+end
 
 ps = [ 1, 0.1, 20, 1, 1]
 Nmax = 200
@@ -49,12 +47,12 @@ u0 = zeros(2, Nmax)
 u0[1] = 1.0
 
 prob = convert(ODEProblem, sys, u0, maximum(tt), ps)
-sol = solve(prob, Vern7(), abstol=1e-9, reltol=1e-6, saveat=tt)
+sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 f = (du,u,t) -> mul!(du, A, u)
 
 probA = ODEProblem(f, u0, 10.0)
-solA = solve(prob, Vern7(), abstol=1e-9, reltol=1e-6, saveat=tt)
+solA = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 @test sol.u[1] ≈ solA.u[1] atol=1e-4
 @test sol.u[2] ≈ solA.u[2] atol=1e-4

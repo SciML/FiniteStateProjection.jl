@@ -9,7 +9,7 @@ Finite State Projection [[1]](#1)  algorithms for chemical reaction networks bas
 - FSP equations are generated as `ODEFunction`/`ODEProblem`s and can be solved with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl), with on-the-fly generation of targeted functions for improved performance
 - The Chemical Master Equation can be represented as a `SparseMatrixCSC`
 
-More information is available in the [documentation](https://kaandocal.github.io/FiniteStateProjection.jl/dev/). Please feel free to open issues and submit pull requests! 
+More information is available in the [documentation](https://kaandocal.github.io/FiniteStateProjection.jl/dev/). Please feel free to open issues and submit pull requests!
 
 ## Examples
 ### Birth-Death System
@@ -20,7 +20,7 @@ using OrdinaryDiffEq
 rn = @reaction_network begin
     σ, 0 --> A
     d, A --> 0
-end σ d
+end
 
 sys = FSPSystem(rn)
 
@@ -30,7 +30,7 @@ ps = [ 10.0, 1.0 ]
 # Initial distribution (over 1 species)
 # Here we start with 0 copies of A
 u0 = zeros(50)
-u0[1] = 1.0 
+u0[1] = 1.0
 
 prob = convert(ODEProblem, sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())
@@ -47,7 +47,7 @@ rn = @reaction_network begin
     σ_off, G_on --> 0
     ρ, G_on --> G_on + M
     d, M --> 0
-end σ_on σ_off ρ d
+end
 
 sys = FSPSystem(rn)
 

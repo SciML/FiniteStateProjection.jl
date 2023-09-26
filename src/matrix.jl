@@ -6,7 +6,7 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
     J = Int[]
     V = Float64[]
 
-    predsize = Ntot * (length(Catalyst.get_eqs(sys.rs)) + 1)
+    predsize = Ntot * (length(Catalyst.equations(sys.rs)) + 1)
 
     sizehint!(I, predsize)
     sizehint!(J, predsize)
@@ -33,7 +33,7 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
             push!(I, lind[idx_cout])
             push!(J, lind[idx_cin])
 
-            rate = rf(idx_cin, t, ps...) 
+            rate = rf(idx_cin, t, ps...)
             push!(V, rate)
         end
     end
@@ -49,7 +49,7 @@ function create_sparsematrix_ss(sys::FSPSystem, dims::NTuple, ps)
     J = Int[]
     V = Float64[]
 
-    predsize = 2 * Ntot * length(Catalyst.get_eqs(sys.rs))
+    predsize = 2 * Ntot * length(Catalyst.equations(sys.rs))
 
     sizehint!(I, predsize)
     sizehint!(J, predsize)
@@ -79,8 +79,8 @@ end
 """
     Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, t::Real)
 
-Convert the reaction system into a sparse matrix defining the right-hand side of the 
-Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP and 
+Convert the reaction system into a sparse matrix defining the right-hand side of the
+Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP and
 `ps` is the tuple of parameters. The sparse matrix works on the flattened version
 of the state obtained using `vec`.
 """
@@ -91,7 +91,7 @@ end
 """
     Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, ::SteadyState)
 
-Convert the reaction system into a sparse matrix defining the right-hand side of the 
+Convert the reaction system into a sparse matrix defining the right-hand side of the
 Chemical Master Equation, steady-state version.
 """
 function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, ::SteadyState)

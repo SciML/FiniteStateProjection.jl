@@ -42,7 +42,7 @@ This point might seem obvious, but errors in the rate functions, or an incorrect
 rn = @reaction_network begin
    σ * (N - I), I --> 2I
    ρ, I --> 0
-end σ ρ N
+end
 
 sys_fsp = FSPSystem(rn)
 ```
