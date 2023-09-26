@@ -5,7 +5,7 @@ using OrdinaryDiffEq
 rn = @reaction_network begin
     σ, 0 --&gt; A
     d, A --&gt; 0
-end σ d
+end
 
 sys = FSPSystem(rn)
 
@@ -15,7 +15,7 @@ ps = [ 10.0, 1.0 ]
 # Initial distribution (over 1 species)
 # Here we start with 0 copies of A
 u0 = zeros(50)
-u0[1] = 1.0 
+u0[1] = 1.0
 
 prob = ODEProblem(sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())</code></pre><p><img src="assets/birth_death.png" alt="Visualisation"/></p><h2 id="Telegraph-Model"><a class="docs-heading-anchor" href="#Telegraph-Model">Telegraph Model</a><a id="Telegraph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Telegraph-Model" title="Permalink"></a></h2><p>Here we showcase the telegraph model, a simplistic description of mRNA transcription in biological cells. We have one gene that transitions stochastically between an <em>on</em> and an <em>off</em> state and produces mRNA molecules while it is in the <em>on</em> state.</p><p>The most straightforward description of this system includes three species: two gene states, <code>G_on</code> and <code>G_off</code>, and mRNA <code>M</code>. The state space for this system is 3-dimensional. We know, however, that <code>G_on</code> and <code>G_off</code> never occur at the same time, indeed the conservation law <code>[G_on] + [G_off] = 1</code> allows us to express the state of the system in terms of <code>G_on</code> and <code>M</code> only. The state space of this reduced system is 2-dimensional.If we use an mRNA cutoff of 100, the state space for the original model has size <span>$2 \times 2 \times 100 = 400$</span>, while the reduced state space has size <span>$2 \times 100 = 200$</span>, a two-fold saving. Since the FSP get computationally more expensive for each species in a system, eliminating redundant species as above is recommended for improved performance.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>The class <code>ReducingIndexHandler</code>, which performed such reduction on the fly, has been deprecated and will be moved into <a href="https://github.com/SciML/Catalyst.jl">Catalyst.jl</a>.</p></div></div><pre><code class="language-julia hljs">using FiniteStateProjection
@@ -26,7 +26,7 @@ rn = @reaction_network begin
     σ_off, G_on --&gt; 0
     ρ, G_on --&gt; G_on + M
     d, M --&gt; 0
-end σ_on σ_off ρ d
+end
 
 sys = FSPSystem(rn)
 
@@ -39,4 +39,4 @@ u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
 prob = ODEProblem(sys, u0, (0, 10.0), ps)
-sol = solve(prob, Vern7())</code></pre><p><img src="assets/telegraph.png" alt="Visualisation"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="troubleshoot.html">« Troubleshooting</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Thursday 16 February 2023 12:53">Thursday 16 February 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+sol = solve(prob, Vern7())</code></pre><p><img src="assets/telegraph.png" alt="Visualisation"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="troubleshoot.html">« Troubleshooting</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Tuesday 26 September 2023 10:13">Tuesday 26 September 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
