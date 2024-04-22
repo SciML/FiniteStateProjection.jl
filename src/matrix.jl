@@ -1,4 +1,4 @@
-function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
+function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t; idx_filter = x->true)
     Ntot = prod(dims)
     lind = LinearIndices(sys.ih, dims)
 
@@ -16,6 +16,11 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
         idx_lin = lind[idx_cart]
         push!(I, idx_lin)
         push!(J, idx_lin)
+        
+        if !idx_filter(idx_cart)
+            push!(V, -1.0)
+            continue
+        end
 
         rate = 0.0
         for rf in sys.rfs
@@ -28,6 +33,10 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
     S::Matrix{Int64} = netstoichmat(sys.rs)
     for (i, rf) in enumerate(sys.rfs)
         for (idx_cin, idx_cout) in pairedindices(sys.ih, dims, CartesianIndex(S[:,i]...))
+            if !idx_filter(idx_cin) || !idx_filter(idx_cout)
+                continue
+            end
+            
             idx_lin = lind[idx_cin]
             idx_lout = lind[idx_cout]
             push!(I, lind[idx_cout])
@@ -74,7 +83,6 @@ function create_sparsematrix_ss(sys::FSPSystem, dims::NTuple, ps)
 
     sparse(I, J, V)
 end
-
 
 """
     Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, t::Real)
