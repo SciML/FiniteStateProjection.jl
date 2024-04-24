@@ -41,10 +41,10 @@ sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 @test marg(sol.u[3], dims=1) ≈ pdf.(Poisson(ps[3] / ps[4] * (1 - exp(-ps[4] * tt[3]))), 0:Nmax) atol=1e-4
 
 A = convert(SparseMatrixCSC, sys, (Nmax+1, Nmax+1), ps, 0)
-f = (du,u,t) -> mul!(du, A, u)
+f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
 probA = ODEProblem(f, u0, 10.0)
-solA = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
+solA = solve(probA, Vern7(), abstol=1e-6, saveat=tt)
 
 @test sol.u[1] ≈ solA.u[1] atol=1e-4
 @test sol.u[2] ≈ solA.u[2] atol=1e-4
