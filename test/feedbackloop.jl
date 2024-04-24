@@ -5,6 +5,7 @@ using OrdinaryDiffEq
 using SteadyStateDiffEq
 using FiniteStateProjection
 using SparseArrays
+using LinearAlgebra
 
 rs = @reaction_network begin
 	σ_off, G + P → 0
@@ -51,7 +52,7 @@ sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
-probA = ODEProblem(f, u0, 10.0)
+probA = ODEProblem(f, u0, 20.0)
 solA = solve(probA, Vern7(), abstol=1e-6, saveat=tt)
 
 @test sol.u[1] ≈ solA.u[1] atol=1e-4
