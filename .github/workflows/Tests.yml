@@ -21,7 +21,6 @@ jobs:
         version:
           - "1"
           - "1.6"
-          - "1.9"
     uses: "SciML/.github/.github/workflows/tests.yml@v1"
     with:
       julia-version: "${{ matrix.version }}"
