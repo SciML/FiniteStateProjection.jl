@@ -1,6 +1,6 @@
 # FiniteStateProjection.jl
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://kaandocal.github.io/FiniteStateProjection.jl/dev/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://docs.sciml.ai/FiniteStateProjection/dev/)
 
 Finite State Projection [[1]](#1)  algorithms for chemical reaction networks based on [Catalyst.jl](https://github.com/SciML/Catalyst.jl) and [ModelingToolkit.jl](https://github.com/SciML/ModelingToolkit.jl). Converts descriptions of reaction networks into `ODEProblem`s and `SteadyStateProblem`s for use with [DifferentialEquations.jl](https://github.com/SciML/DifferentialEquations.jl).
 
