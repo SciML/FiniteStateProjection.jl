@@ -45,7 +45,7 @@ function create_A(ps, Nmax)
 end
 
 A = create_A(ps, Nmax)
-A_fsp = convert(SparseMatrixCSC, sys, (2, Nmax), pmap, 0.)
+A_fsp = SparseMatrixCSC(sys, (2, Nmax), pmap, 0.)
 
 @test A ≈ A_fsp
 
@@ -79,7 +79,7 @@ function create_A_ss(ps, Nmax)
 end
 
 A_ss = create_A_ss(ps, Nmax)
-A_fsp_ss = convert(SparseMatrixCSC, sys, (2, Nmax), pmap, SteadyState())
+A_fsp_ss = SparseMatrixCSC(sys, (2, Nmax), pmap, SteadyState())
 
 @test A_ss ≈ A_fsp_ss
 

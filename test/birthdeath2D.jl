@@ -44,7 +44,7 @@ sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 @test marg(sol.u[3], dims=2) ≈ pdf.(Poisson(ps[1] / ps[2] * (1 - exp(-ps[2] * tt[3]))), 0:Nmax) atol=1e-4
 @test marg(sol.u[3], dims=1) ≈ pdf.(Poisson(ps[3] / ps[4] * (1 - exp(-ps[4] * tt[3]))), 0:Nmax) atol=1e-4
 
-A = convert(SparseMatrixCSC, sys, (Nmax+1, Nmax+1), pmap, 0)
+A = SparseMatrixCSC(sys, (Nmax+1, Nmax+1), pmap, 0)
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
 probA = ODEProblem(f, u0, 10.0)
@@ -63,7 +63,7 @@ sol.u ./= sum(sol.u)
 @test marg(sol.u, dims=2) ≈ pdf.(Poisson(ps[1] / ps[2]), 0:Nmax) atol=1e-4
 @test marg(sol.u, dims=1) ≈ pdf.(Poisson(ps[3] / ps[4]), 0:Nmax) atol=1e-4
 
-A = convert(SparseMatrixCSC, sys, (Nmax+1, Nmax+1), pmap, SteadyState())
+A = SparseMatrixCSC(sys, (Nmax+1, Nmax+1), pmap, SteadyState())
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
 probA = SteadyStateProblem(f, u0)

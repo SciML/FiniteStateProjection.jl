@@ -77,23 +77,23 @@ end
 
 
 """
-    Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, t::Real)
+    SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, ps, t::Real)
 
 Convert the reaction system into a sparse matrix defining the right-hand side of the
 Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP and
 `ps` is the tuple of parameters. The sparse matrix works on the flattened version
 of the state obtained using `vec`.
 """
-function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, pmap, t::Real)
+function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, t::Real)
     create_sparsematrix(sys, dims, pmap_to_p(sys, pmap), t)
 end
 
 """
-    Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, ::SteadyState)
+    SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, ps, ::SteadyState)
 
 Convert the reaction system into a sparse matrix defining the right-hand side of the
 Chemical Master Equation, steady-state version.
 """
-function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, pmap, ::SteadyState)
+function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, ::SteadyState)
     create_sparsematrix_ss(sys, dims, pmap_to_p(sys, pmap))
 end
