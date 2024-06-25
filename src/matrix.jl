@@ -84,8 +84,8 @@ Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP a
 `ps` is the tuple of parameters. The sparse matrix works on the flattened version
 of the state obtained using `vec`.
 """
-function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, t::Real)
-    create_sparsematrix(sys, dims, ps, t)
+function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, pmap, t::Real)
+    create_sparsematrix(sys, dims, pmap_to_p(sys, pmap), t)
 end
 
 """
@@ -94,6 +94,6 @@ end
 Convert the reaction system into a sparse matrix defining the right-hand side of the
 Chemical Master Equation, steady-state version.
 """
-function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, ps, ::SteadyState)
-    create_sparsematrix_ss(sys, dims, ps)
+function Base.convert(::Type{SparseMatrixCSC}, sys::FSPSystem, dims::NTuple, pmap, ::SteadyState)
+    create_sparsematrix_ss(sys, dims, pmap_to_p(sys, pmap))
 end

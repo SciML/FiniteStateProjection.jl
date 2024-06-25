@@ -49,3 +49,8 @@ function compile_ratefunc(ex_rf, params)
     ex = :((idx_in, t, $(params...)) -> $(ex_rf)) |> MacroTools.flatten
     @RuntimeGeneratedFunction(ex)
 end
+
+function pmap_to_p(sys::FSPSystem, pmap)
+    pmap_conv = eltype(pmap) <: Pair{Symbol} ? Catalyst.symmap_to_varmap(sys.rs, pmap) : pmap
+    ModelingToolkit.varmap_to_vars(pmap_conv, Catalyst.parameters(sys.rs)) 
+end
