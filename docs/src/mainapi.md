@@ -26,5 +26,5 @@ Computing steady-state distributions can be done using the SteadyStateDiffEq.jl 
 
 ```@docs
 Base.convert(::Type{ODEFunction}, ::FSPSystem, ::SteadyState)
-Base.convert(::Type{SteadyStateProblem}, ::FSPSystem, u0, p)
+DiffEqBase.SteadyStateProblem(::FSPSystem, u0, p)
 ```

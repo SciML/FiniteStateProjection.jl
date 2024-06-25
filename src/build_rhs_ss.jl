@@ -68,10 +68,10 @@ with `SteadyStateProblem`s.
 Base.convert(::Type{ODEFunction}, sys::FSPSystem, ::SteadyState) = ODEFunction{true}(build_rhs_ss(sys))
 
 """
-    Base.convert(::Type{SteadyStateProblem}, sys::FSPSystem, u0[, p])
+    DiffEqBase.SteadyStateProblem(sys::FSPSystem, u0[, p])
 
 Return a `SteadyStateProblem` for use in `DifferentialEquations.
 """
-function Base.convert(::Type{SteadyStateProblem}, sys::FSPSystem, u0, pmap=NullParameters())
+function DiffEqBase.SteadyStateProblem(sys::FSPSystem, u0, pmap=NullParameters())
     SteadyStateProblem(convert(ODEFunction, sys, SteadyState()), u0, pmap_to_p(sys, pmap))
 end

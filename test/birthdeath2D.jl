@@ -56,7 +56,7 @@ solA = solve(probA, Vern7(), abstol=1e-6, saveat=tt)
 
 ## Steady-State Tests
 
-prob = convert(SteadyStateProblem, sys, u0, pmap)
+prob = SteadyStateProblem(sys, u0, pmap)
 sol = solve(prob, SSRootfind())
 sol.u ./= sum(sol.u)
 

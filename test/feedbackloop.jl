@@ -83,7 +83,7 @@ A_fsp_ss = SparseMatrixCSC(sys, (2, Nmax), pmap, SteadyState())
 
 @test A_ss ≈ A_fsp_ss
 
-prob = convert(SteadyStateProblem, sys, u0, pmap)
+prob = SteadyStateProblem(sys, u0, pmap)
 sol = solve(prob, SSRootfind())
 sol.u ./= sum(sol.u)
 
