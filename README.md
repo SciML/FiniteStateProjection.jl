@@ -25,7 +25,7 @@ end
 sys = FSPSystem(rn)
 
 # Parameters for our system
-ps = [ 10.0, 1.0 ]
+ps = [ :σ => 10.0, :d => 1.0 ]
 
 # Initial distribution (over 1 species)
 # Here we start with 0 copies of A
@@ -52,7 +52,7 @@ end
 sys = FSPSystem(rn)
 
 # Parameters for our system
-ps = [ 0.25, 0.15, 15.0, 1.0 ]
+ps = [ :σ_on => 0.25, :σ_off => 0.15, :ρ => 15.0, :d => 1.0 ]
 
 # Initial distribution (over two species)
 # Here we start with 0 copies of G_on and M
@@ -63,10 +63,6 @@ prob = convert(ODEProblem, sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())
 ```
 ![Visualisation](docs/src/assets/telegraph.png)
-
-## TODO:
-- Add bursty reactions
-- Add support for sparse Jacobians
 
 ## References
 

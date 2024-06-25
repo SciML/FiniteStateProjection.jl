@@ -16,7 +16,7 @@ end
 sys = FSPSystem(rs)
 
 # Parameters for our system
-ps = [ 0.25, 0.15, 15.0, 1.0 ]
+ps = [ :r1 => 0.25, :r2 => 0.15, :r3 => 15.0, :r4 => 1.0 ]
 
 # Initial values
 # Since G_on + G_off = const. we do not have to model the two

@@ -14,7 +14,7 @@ end
 sys = FSPSystem(rs)
 
 # Parameters for our system
-ps = [ 10.0, 1.0 ]
+ps = [ :r1 => 10.0, :r2 => 1.0 ]
 
 # Initial values
 u0 = zeros(50)
