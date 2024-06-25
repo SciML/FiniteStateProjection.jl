@@ -15,7 +15,14 @@ rs = @reaction_network begin
 	d, P → 0
 end
 
-ps = [ 1, 0.1, 20, 1, 1]
+pmap = [ :σ_off => 1,
+         :σ_on => 0.1,
+         :ρ_on => 20,
+         :ρ_off => 1,
+         :d => 1 ]
+
+ps = last.(pmap)
+
 Nmax = 200
 
 sys = FSPSystem(rs)
@@ -38,7 +45,7 @@ function create_A(ps, Nmax)
 end
 
 A = create_A(ps, Nmax)
-A_fsp = convert(SparseMatrixCSC, sys, (2, Nmax), ps, 0.)
+A_fsp = convert(SparseMatrixCSC, sys, (2, Nmax), pmap, 0.)
 
 @test A ≈ A_fsp
 
@@ -47,7 +54,7 @@ tt = [ 1.0, 10.0, 20.0 ]
 u0 = zeros(2, Nmax)
 u0[1] = 1.0
 
-prob = convert(ODEProblem, sys, u0, maximum(tt), ps)
+prob = convert(ODEProblem, sys, u0, maximum(tt), pmap)
 sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
@@ -72,11 +79,11 @@ function create_A_ss(ps, Nmax)
 end
 
 A_ss = create_A_ss(ps, Nmax)
-A_fsp_ss = convert(SparseMatrixCSC, sys, (2, Nmax), ps, SteadyState())
+A_fsp_ss = convert(SparseMatrixCSC, sys, (2, Nmax), pmap, SteadyState())
 
 @test A_ss ≈ A_fsp_ss
 
-prob = convert(SteadyStateProblem, sys, u0, ps)
+prob = convert(SteadyStateProblem, sys, u0, pmap)
 sol = solve(prob, SSRootfind())
 sol.u ./= sum(sol.u)
 
