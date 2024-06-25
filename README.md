@@ -32,7 +32,7 @@ ps = [ :σ => 10.0, :d => 1.0 ]
 u0 = zeros(50)
 u0[1] = 1.0
 
-prob = convert(ODEProblem, sys, u0, (0, 10.0), ps)
+prob = ODEProblem(sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())
 ```
 ![Visualisation](docs/src/assets/birth_death.png)
@@ -59,7 +59,7 @@ ps = [ :σ_on => 0.25, :σ_off => 0.15, :ρ => 15.0, :d => 1.0 ]
 u0 = zeros(2, 50)
 u0[1,1] = 1.0
 
-prob = convert(ODEProblem, sys, u0, (0, 10.0), ps)
+prob = ODEProblem(sys, u0, (0, 10.0), ps)
 sol = solve(prob, Vern7())
 ```
 ![Visualisation](docs/src/assets/telegraph.png)

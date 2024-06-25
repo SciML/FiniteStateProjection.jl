@@ -133,12 +133,12 @@ a reaction system to an `ODEProblem` (which implicitly calls this function).
 Base.convert(::Type{ODEFunction}, sys::FSPSystem) = ODEFunction{true}(build_rhs(sys))
 
 """
-    Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tmax[, p])
+    DiffEqBase.ODEProblem(sys::FSPSystem, u0, tmax[, p])
 
 Return an `ODEProblem` for use in `DifferentialEquations`. This function implicitly
 calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction` 
 first and then use that to create `ODEProblem`s.
 """
-function Base.convert(::Type{ODEProblem}, sys::FSPSystem, u0, tint, pmap=NullParameters())
+function DiffEqBase.ODEProblem(sys::FSPSystem, u0, tint, pmap=NullParameters())
     ODEProblem(convert(ODEFunction, sys), u0, tint, pmap_to_p(sys, pmap))
 end

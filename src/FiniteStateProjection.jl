@@ -5,6 +5,7 @@ using Reexport
 
 using MacroTools
 using SparseArrays
+using DiffEqBase
 
 import Base: LinearIndices, vec
 

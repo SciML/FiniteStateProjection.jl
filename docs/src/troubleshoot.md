@@ -54,7 +54,7 @@ u0 = zeros(30)
 u0[2] = 1
 
 # N is too small for the state space!
-prob_fsp = convert(ODEProblem, sys_fsp, u0, (0, 100.), [ 1., 1., 20 ])
+prob_fsp = ODEProblem(sys_fsp, u0, (0, 100.), [ 1., 1., 20 ])
 ```
 
 ## Ensure you are using the right solver

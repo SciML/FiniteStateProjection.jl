@@ -22,7 +22,7 @@ u0[1] = 1.0
 
 ##
 
-prob = convert(ODEProblem, sys, u0, 10.0, ps)
+prob = ODEProblem(sys, u0, 10.0, ps)
 
 ##
 

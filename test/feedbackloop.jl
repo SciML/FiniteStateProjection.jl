@@ -54,7 +54,7 @@ tt = [ 1.0, 10.0, 20.0 ]
 u0 = zeros(2, Nmax)
 u0[1] = 1.0
 
-prob = convert(ODEProblem, sys, u0, maximum(tt), pmap)
+prob = ODEProblem(sys, u0, maximum(tt), pmap)
 sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 f = (du,u,p,t) -> mul!(vec(du), A, vec(u))

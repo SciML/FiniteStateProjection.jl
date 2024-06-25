@@ -32,7 +32,7 @@ u0[1] = 1.0
 
 tt = [ 0.25, 1.0, 10.0 ]
 
-prob = convert(ODEProblem, sys, u0, 10.0, pmap)
+prob = ODEProblem(sys, u0, 10.0, pmap)
 sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 @test marg(sol.u[1], dims=2) ≈ pdf.(Poisson(ps[1] / ps[2] * (1 - exp(-ps[2] * tt[1]))), 0:Nmax) atol=1e-4

@@ -17,7 +17,7 @@ The following methods convert a reaction network into a system of ODEs represent
  
 ```@docs
 Base.convert(::Type{ODEFunction}, ::FSPSystem)
-Base.convert(::Type{ODEProblem}, ::FSPSystem, u0, tmax, p)
+DiffEqBase.ODEProblem(::FSPSystem, u0, tmax, p)
 ```
 
 ## Steady-State Problems
