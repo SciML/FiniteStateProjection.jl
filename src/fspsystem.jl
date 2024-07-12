@@ -9,7 +9,8 @@ struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rfs::RT
 end
 
-function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ratelaw::Bool=true)
+function FSPSystem(rs::ReactionSystem, ih::AbstractIndexHandler=DefaultIndexHandler{length(Catalyst.species(rs))}(); 
+                   combinatoric_ratelaw::Bool=true)
     isempty(Catalyst.get_systems(rs)) ||
         error("Supported Catalyst models can not contain subsystems. Please use `rs = Catalyst.flatten(rs::ReactionSystem)` to generate a single system with no subsystems from your Catalyst model.")
     any(eq -> !(eq isa Reaction), equations(rs)) &&
@@ -18,6 +19,11 @@ function FSPSystem(rs::ReactionSystem, ih=DefaultIndexHandler(); combinatoric_ra
     rfs = create_ratefuncs(rs, ih; combinatoric_ratelaw=combinatoric_ratelaw)
     FSPSystem(rs, ih, rfs)
 end
+
+function FSPSystem(rs::ReactionSystem, order::AbstractVector{Symbol}; kwargs...)
+    FSPSystem(rs, PermutingIndexHandler(rs, order); kwargs...)
+end
+
 
 """
     build_ratefuncs(rs, ih; state_sym::Symbol, combinatoric_ratelaw::Bool)::Vector

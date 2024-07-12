@@ -83,14 +83,46 @@ A_fsp_ss = SparseMatrixCSC(sys, (2, Nmax), pmap, SteadyState())
 
 @test A_ss ≈ A_fsp_ss
 
-prob = SteadyStateProblem(sys, u0, pmap)
-sol = solve(prob, SSRootfind())
-sol.u ./= sum(sol.u)
+prob_ss = SteadyStateProblem(sys, u0, pmap)
+sol_ss = solve(prob_ss, SSRootfind())
+sol_ss.u ./= sum(sol_ss.u)
 
-f = (du,u,p,t) -> mul!(vec(du), A, vec(u))
+f_ss = (du,u,p,t) -> mul!(vec(du), A, vec(u))
 
-probA = SteadyStateProblem(f, u0)
-solA = solve(prob, SSRootfind())
-solA.u ./= sum(solA.u)
+probA_ss = SteadyStateProblem(f, u0)
+solA_ss = solve(probA_ss, SSRootfind())
+solA_ss.u ./= sum(solA_ss.u)
 
-@test sol.u ≈ solA.u atol=1e-4
+@test sol_ss.u ≈ solA_ss.u atol=1e-4
+
+### Permutations
+
+sys_perm = FSPSystem(rs, [:P, :G])
+
+u0_perm = u0'
+
+A_perm = SparseMatrixCSC(sys_perm, (Nmax, 2), pmap, 0.)
+
+idx_perm = vec(reshape(1:2*Nmax, (Nmax, 2))')
+P = sparse(1:2*Nmax, idx_perm, 1)'
+
+@test A_perm ≈ P * A * P'
+
+prob_perm = ODEProblem(sys_perm, u0_perm, maximum(tt), pmap)
+sol_perm = solve(prob_perm, Vern7(), abstol=1e-6, saveat=tt)
+
+@test sol_perm.u[1] ≈ sol.u[1]' atol=1e-4
+@test sol_perm.u[2] ≈ sol.u[2]' atol=1e-4
+@test sol_perm.u[3] ≈ sol.u[3]' atol=1e-4
+
+A_fsp_ss_perm = SparseMatrixCSC(sys_perm, (Nmax, 2), pmap, SteadyState())
+
+@test A_fsp_ss_perm ≈ P * A_ss * P'
+
+prob_ss_perm = SteadyStateProblem(sys_perm, u0_perm, pmap)
+sol_ss_perm = solve(prob_ss_perm, SSRootfind())
+sol_ss_perm.u ./= sum(sol_ss_perm.u)
+
+@test sol_ss_perm.u ≈ sol_ss.u' atol=1e-4
+
+
