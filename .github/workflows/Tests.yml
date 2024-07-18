@@ -2,12 +2,12 @@ name: "Run Tests"
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - 'docs/**'
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - 'docs/**'
 
