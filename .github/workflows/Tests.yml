@@ -1,12 +1,16 @@
-name: "Tests"
-
+name: "Run Tests"
 on:
   push:
     branches:
-      - "main"
-    tags:
-      - "*"
+      - master
+    paths-ignore:
+      - 'docs/**'
   pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,10 +22,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - "1"
-          - "1.6"
+        group:
+          - Core
     uses: "SciML/.github/.github/workflows/tests.yml@v1"
     with:
-      julia-version: "${{ matrix.version }}"
+      group: ${{ matrix.group }}
+      julia-version: '1'
     secrets: "inherit"
+    
