@@ -124,5 +124,3 @@ sol_ss_perm = solve(prob_ss_perm, SSRootfind())
 sol_ss_perm.u ./= sum(sol_ss_perm.u)
 
 @test sol_ss_perm.u ≈ sol_ss.u' atol=1e-4
-
-

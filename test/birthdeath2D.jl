@@ -27,7 +27,7 @@ pmap = [ :r1 => prs[1],
 
 ps = last.(pmap)
  
-Nmax = 40
+Nmax = 45
 
 u0 = zeros(Nmax+1, Nmax+1)
 u0[1] = 1.0
