@@ -123,12 +123,12 @@ function getsubstitutions(ih::DefaultIndexHandler, rs::ReactionSystem; state_sym
     Dict(symbol => state_sym_vec[i] - ih.offset for (i, symbol) in enumerate(species_perm))
 end
 
-"""
+#"""
     PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector)
 
 Constructs an index handler for the reaction system in which the species appear in the order
 defined by the vector `order`.
-"""
+#"""
 function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector{Symbol})
     PermutingIndexHandler(rs, map(sym -> Catalyst._symbol_to_var(rs, sym), order))
 end
