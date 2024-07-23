@@ -31,7 +31,7 @@ pmap = [ :σ_on => rand(Gamma()),
 ps = last.(pmap)
  
 Mmax = 20
-Pmax = 70
+Pmax = 80
 
 u0 = zeros(2, Mmax+1, Pmax+1)
 u0[1] = 1.0
@@ -43,10 +43,20 @@ sol = solve(prob, Vern7(), abstol=1e-6, saveat=tt)
 
 fspmean(xx) = dot(xx, 0:length(xx)-1)
 
+mG_asym = ps[1] / (ps[1] + ps[2])
+
 for (i, t) in enumerate(tt)
-    mG = ps[1] / (ps[1] + ps[2]) * (1 - exp(-(ps[1] + ps[2]) * t))
+    mG = mG_asym * (1 - exp(-(ps[1] + ps[2]) * t))
+    mM = ps[3] * mG_asym * (1 / ps[4] * (1 - exp(-ps[4] * t)) - 
+                            1 / (ps[4] - ps[1] - ps[2]) * (exp(-(ps[1] + ps[2]) * t) - exp(-ps[4]*t)))
+    mP = ps[5] * ps[3] * mG_asym * (1 / (ps[4] * ps[6]) * (1 - exp(-ps[6] * t)) -
+                                    1 / (ps[4] * (ps[6] - ps[4])) * (exp(-ps[4] * t) - exp(-ps[6] * t)) -
+                                    1 / ((ps[6] - ps[1] - ps[2]) * (ps[4] - ps[1] - ps[2])) * (exp(-(ps[1] + ps[2]) * t) - exp(-ps[6]*t)) +
+                                         1 / ((ps[6] - ps[4]) * (ps[4] - ps[1] - ps[2])) * (exp(-ps[4] * t) - exp(-ps[6]*t)))
 
     @test marg(sol.u[i], dims=(2,3)) ≈ pdf.(Bernoulli(mG), 0:1) atol=1e-4
+    @test fspmean(marg(sol.u[i], dims=(1,3))) ≈ mM atol=1e-2
+    @test fspmean(marg(sol.u[i], dims=(1,2))) ≈ mP atol=1e-2
 end
 
 A = SparseMatrixCSC(sys, size(u0), pmap, 0)
