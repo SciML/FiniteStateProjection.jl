@@ -1,7 +1,7 @@
 name = "FiniteStateProjection"
 uuid = "069e79ea-d681-44e8-b935-95bdaf9e8f28"
 authors = ["kaandocal"]
-version = "0.3.1"
+version = "0.3.2"
 
 [deps]
 Catalyst = "479239e8-5488-4da2-87a7-35f2df7eef83"
@@ -12,7 +12,7 @@ RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-Catalyst = "13,14"
+Catalyst = "13,14,15"
 DiffEqBase = "6"
 MacroTools = "^0.5.5"
 Reexport = "1"
