@@ -1,4 +1,5 @@
 # Internal API
+
 ```@meta
 CurrentModule = FiniteStateProjection
 ```
@@ -8,14 +9,16 @@ CurrentModule = FiniteStateProjection
 ### Index Handler Interface
 
 User-defined index handlers should inherit from `AbstractIndexHandler` and implement the following methods:
-- [`getsubstitutions`](@ref getsubstitutions)
-- [`build_rhs_header`](@ref build_rhs_header)
-- [`singleindices`](@ref singleindices)
-- [`pairedindices`](@ref pairedindices)
+
+  - [`getsubstitutions`](@ref getsubstitutions)
+  - [`build_rhs_header`](@ref build_rhs_header)
+  - [`singleindices`](@ref singleindices)
+  - [`pairedindices`](@ref pairedindices)
 
 For matrix conversions they should additionally implement:
-- [`LinearIndices`](@ref Base.LinearIndices)
-- [`vec`](@ref Base.vec)
+
+  - [`LinearIndices`](@ref Base.LinearIndices)
+  - [`vec`](@ref Base.vec)
 
 ```@docs
 singleindices
@@ -26,11 +29,13 @@ LinearIndices
 ```
 
 ### Built-in implementations
+
 ```@docs
 getsubstitutions(::DefaultIndexHandler, ::ReactionSystem)
 ```
 
 ## Function Building
+
 ```@docs
 build_rhs
 unpackparams
@@ -40,6 +45,7 @@ build_rhs_secondpass
 ```
 
 ## Steady-State Functions
+
 ```@docs
 build_rhs_ss
 build_rhs_singlepass_ss

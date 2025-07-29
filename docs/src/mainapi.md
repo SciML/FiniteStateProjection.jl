@@ -1,4 +1,5 @@
 # Main API
+
 ```@meta
 CurrentModule = FiniteStateProjection
 ```
@@ -13,8 +14,8 @@ FSPSystem
 
 ## Creating ODE systems
 
-The following methods convert a reaction network into a system of ODEs representing the time-dependent FSP. This package provides a flexible way to represent the FSP in memory via index handlers, see [Index Handlers] for more information. 
- 
+The following methods convert a reaction network into a system of ODEs representing the time-dependent FSP. This package provides a flexible way to represent the FSP in memory via index handlers, see [Index Handlers] for more information.
+
 ```@docs
 Base.convert(::Type{ODEFunction}, ::FSPSystem)
 DiffEqBase.ODEProblem(::FSPSystem, u0, tmax, p)

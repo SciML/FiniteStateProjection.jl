@@ -10,8 +10,8 @@ See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
 function unpackparams(sys::FSPSystem, psym::Symbol)
     param_names = Expr(:tuple, map(par -> par.name, Catalyst.parameters(sys.rs))...)
-     
-    quote 
+
+    quote
         $(param_names) = $(psym)
     end
 end
@@ -26,7 +26,7 @@ just unpacks parameters from `p`.
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
 function build_rhs_header(sys::FSPSystem)
-    quote 
+    quote
         ps = p
         $(unpackparams(sys, :ps))
     end
@@ -79,7 +79,8 @@ function build_rhs_secondpass(sys::FSPSystem)
 
     for (i, rf) in enumerate(sys.rfs)
         ex = quote
-            for (idx_in, idx_out) in pairedindices($(sys.ih), u, $(CartesianIndex(S[:,i]...)))
+            for (idx_in, idx_out) in pairedindices(
+                $(sys.ih), u, $(CartesianIndex(S[:, i]...)))
                 du[idx_out] += u[idx_in] * $(rf.body)
             end
         end
@@ -92,7 +93,7 @@ end
 
 ##
 
-function build_rhs_ex(sys::FSPSystem; striplines::Bool=false)
+function build_rhs_ex(sys::FSPSystem; striplines::Bool = false)
     header = build_rhs_header(sys)
     first_pass = build_rhs_firstpass(sys)
     second_pass = build_rhs_secondpass(sys)
@@ -115,7 +116,7 @@ Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME
 for use with DifferentialEquations.jl.
 """
 function build_rhs(sys::FSPSystem)
-    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines=false))
+    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines = false))
 end
 
 ##
@@ -136,9 +137,9 @@ Base.convert(::Type{ODEFunction}, sys::FSPSystem) = ODEFunction{true}(build_rhs(
     DiffEqBase.ODEProblem(sys::FSPSystem, u0, tmax[, p])
 
 Return an `ODEProblem` for use in `DifferentialEquations`. This function implicitly
-calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction` 
+calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction`
 first and then use that to create `ODEProblem`s.
 """
-function DiffEqBase.ODEProblem(sys::FSPSystem, u0, tint, pmap=NullParameters())
+function DiffEqBase.ODEProblem(sys::FSPSystem, u0, tint, pmap = NullParameters())
     ODEProblem(convert(ODEFunction, sys), u0, tint, pmap_to_p(sys, pmap))
 end
