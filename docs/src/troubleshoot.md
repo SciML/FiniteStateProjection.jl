@@ -9,10 +9,10 @@ If your are solving an SIR model with three species, ``S``, ``I`` and ``R``, you
 ```julia
 # correct
 u0 = zeros(101, 101, 101)
-u0[100,2,1] = 1.0           # start with 1 infected and 99 susceptible individuals
+u0[100, 2, 1] = 1.0           # start with 1 infected and 99 susceptible individuals
 
 # incorrect
-u0 = [99,1,0]               # wrong type (Int) and shape (1D)
+u0 = [99, 1, 0]               # wrong type (Int) and shape (1D)
 ```
 
 ## Ensure your state space is big enough
@@ -40,8 +40,8 @@ This point might seem obvious, but errors in the rate functions, or an incorrect
 
 ```julia
 rn = @reaction_network begin
-   σ * (N - I), I --> 2I
-   ρ, I --> 0
+    σ * (N - I), I --> 2I
+    ρ, I --> 0
 end
 
 sys_fsp = FSPSystem(rn)
@@ -54,7 +54,7 @@ u0 = zeros(30)
 u0[2] = 1
 
 # N is too small for the state space!
-prob_fsp = ODEProblem(sys_fsp, u0, (0, 100.), [ 1., 1., 20 ])
+prob_fsp = ODEProblem(sys_fsp, u0, (0, 100.0), [1.0, 1.0, 20])
 ```
 
 ## Ensure you are using the right solver
