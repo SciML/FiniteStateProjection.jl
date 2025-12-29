@@ -51,7 +51,7 @@ function build_rhs_firstpass(sys::FSPSystem)
     other_lines = (:(du[idx_in] -= u[idx_in] * $(rf.body)) for rf in sys.rfs[2:end])
 
     quote
-        for idx_in in singleindices($(sys.ih), u)
+        @inbounds for idx_in in singleindices($(sys.ih), u)
             $first_line
             $(other_lines...)
         end
@@ -79,7 +79,7 @@ function build_rhs_secondpass(sys::FSPSystem)
 
     for (i, rf) in enumerate(sys.rfs)
         ex = quote
-            for (idx_in, idx_out) in
+            @inbounds for (idx_in, idx_out) in
                 pairedindices($(sys.ih), u, $(CartesianIndex(S[:, i]...)))
                 du[idx_out] += u[idx_in] * $(rf.body)
             end

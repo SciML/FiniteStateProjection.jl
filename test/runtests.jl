@@ -10,4 +10,7 @@ using SafeTestsets
     @safetestset "BirthDeath2D" begin
         include("birthdeath2D.jl")
     end
+    @safetestset "Allocation Tests" begin
+        include("alloc_tests.jl")
+    end
 end

@@ -12,7 +12,7 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
     sizehint!(J, predsize)
     sizehint!(V, predsize)
 
-    for idx_cart in singleindices(sys.ih, dims)
+    @inbounds for idx_cart in singleindices(sys.ih, dims)
         idx_lin = lind[idx_cart]
         push!(I, idx_lin)
         push!(J, idx_lin)
@@ -26,7 +26,7 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
     end
 
     S::Matrix{Int64} = netstoichmat(sys.rs)
-    for (i, rf) in enumerate(sys.rfs)
+    @inbounds for (i, rf) in enumerate(sys.rfs)
         for (idx_cin, idx_cout) in pairedindices(sys.ih, dims, CartesianIndex(S[:, i]...))
             idx_lin = lind[idx_cin]
             idx_lout = lind[idx_cout]
@@ -56,7 +56,7 @@ function create_sparsematrix_ss(sys::FSPSystem, dims::NTuple, ps)
     sizehint!(V, predsize)
 
     S::Matrix{Int64} = netstoichmat(sys.rs)
-    for (i, rf) in enumerate(sys.rfs)
+    @inbounds for (i, rf) in enumerate(sys.rfs)
         for (idx_cin, idx_cout) in pairedindices(sys.ih, dims, CartesianIndex(S[:, i]...))
             idx_lin = lind[idx_cin]
             idx_lout = lind[idx_cout]
