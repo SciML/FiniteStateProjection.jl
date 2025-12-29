@@ -73,3 +73,4 @@ sol = solve(prob, Vern7())
 ## References
 
 <a id="1">[1]</a> B. Munsky and M. Khammash, "The Finite State Projection algorithm for the solution of the Chemical Master Equation", Journal of Chemical Physics 124, 044104 (2006). https://doi.org/10.1063/1.2145882
+
