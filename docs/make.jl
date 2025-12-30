@@ -16,4 +16,6 @@ makedocs(sitename = "FiniteStateProjection.jl",
         "Examples" => "examples.md"
     ])
 
-deploydocs(repo = "github.com/kaandocal/FiniteStateProjection.jl.git", devbranch = "main")
+deploydocs(repo = "github.com/SciML/FiniteStateProjection.jl.git",
+    devbranch = "main",
+    push_preview = true)
