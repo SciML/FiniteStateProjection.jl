@@ -11,7 +11,7 @@ See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 function unpackparams(sys::FSPSystem, psym::Symbol)
     param_names = Expr(:tuple, map(par -> par.name, Catalyst.parameters(sys.rs))...)
 
-    quote
+    return quote
         $(param_names) = $(psym)
     end
 end
@@ -26,7 +26,7 @@ just unpacks parameters from `p`.
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """
 function build_rhs_header(sys::FSPSystem)
-    quote
+    return quote
         ps = p
         $(unpackparams(sys, :ps))
     end
@@ -50,7 +50,7 @@ function build_rhs_firstpass(sys::FSPSystem)
     first_line = :(du[idx_in] = -u[idx_in] * $(sys.rfs[1].body))
     other_lines = (:(du[idx_in] -= u[idx_in] * $(rf.body)) for rf in sys.rfs[2:end])
 
-    quote
+    return quote
         for idx_in in singleindices($(sys.ih), u)
             $first_line
             $(other_lines...)
@@ -106,7 +106,7 @@ function build_rhs_ex(sys::FSPSystem; striplines::Bool = false)
 
     ex = ex |> MacroTools.flatten |> MacroTools.prettify
 
-    ex
+    return ex
 end
 
 """
@@ -116,7 +116,7 @@ Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME
 for use with DifferentialEquations.jl.
 """
 function build_rhs(sys::FSPSystem)
-    @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines = false))
+    return @RuntimeGeneratedFunction(build_rhs_ex(sys; striplines = false))
 end
 
 ##
@@ -141,5 +141,5 @@ calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `OD
 first and then use that to create `ODEProblem`s.
 """
 function DiffEqBase.ODEProblem(sys::FSPSystem, u0, tint, pmap = NullParameters())
-    ODEProblem(convert(ODEFunction, sys), u0, tint, pmap_to_p(sys, pmap))
+    return ODEProblem(convert(ODEFunction, sys), u0, tint, pmap_to_p(sys, pmap))
 end

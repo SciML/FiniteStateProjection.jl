@@ -2,7 +2,8 @@ using Documenter
 using FiniteStateProjection
 using SparseArrays
 
-makedocs(sitename = "FiniteStateProjection.jl",
+makedocs(
+    sitename = "FiniteStateProjection.jl",
     modules = [FiniteStateProjection],
     format = Documenter.HTML(prettyurls = false),
     pages = [
@@ -13,9 +14,12 @@ makedocs(sitename = "FiniteStateProjection.jl",
         "Internal API" => "internal.md",
         "Tips & Tricks" => "tips.md",
         "Troubleshooting" => "troubleshoot.md",
-        "Examples" => "examples.md"
-    ])
+        "Examples" => "examples.md",
+    ]
+)
 
-deploydocs(repo = "github.com/SciML/FiniteStateProjection.jl.git",
+deploydocs(
+    repo = "github.com/SciML/FiniteStateProjection.jl.git",
     devbranch = "main",
-    push_preview = true)
+    push_preview = true
+)

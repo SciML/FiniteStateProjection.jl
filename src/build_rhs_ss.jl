@@ -45,7 +45,7 @@ function build_rhs_ex_ss(sys::FSPSystem; striplines::Bool = false)
 
     ex = ex |> MacroTools.flatten |> MacroTools.prettify
 
-    ex
+    return ex
 end
 
 """
@@ -55,7 +55,7 @@ Builds the function `f(du,u,p,t)` that defines the right-hand side of the CME
 for use with `SteadyStateProblem`s.
 """
 function build_rhs_ss(sys::FSPSystem)
-    @RuntimeGeneratedFunction(build_rhs_ex_ss(sys; striplines = false))
+    return @RuntimeGeneratedFunction(build_rhs_ex_ss(sys; striplines = false))
 end
 
 ##
@@ -67,7 +67,7 @@ Return an `ODEFunction` defining the right-hand side of the CME, for use
 with `SteadyStateProblem`s.
 """
 function Base.convert(::Type{ODEFunction}, sys::FSPSystem, ::SteadyState)
-    ODEFunction{true}(build_rhs_ss(sys))
+    return ODEFunction{true}(build_rhs_ss(sys))
 end
 
 """
@@ -76,5 +76,5 @@ end
 Return a `SteadyStateProblem` for use in `DifferentialEquations.
 """
 function DiffEqBase.SteadyStateProblem(sys::FSPSystem, u0, pmap = NullParameters())
-    SteadyStateProblem(convert(ODEFunction, sys, SteadyState()), u0, pmap_to_p(sys, pmap))
+    return SteadyStateProblem(convert(ODEFunction, sys, SteadyState()), u0, pmap_to_p(sys, pmap))
 end

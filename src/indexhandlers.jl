@@ -79,31 +79,45 @@ DefaultIndexHandler{N}() where {N} = DefaultIndexHandler{N}(1, Tuple(1:N))
 Base.vec(::DefaultIndexHandler, arr) = vec(arr)
 Base.LinearIndices(::DefaultIndexHandler, arr) = LinearIndices(arr)
 
-function pairedindices(ih::DefaultIndexHandler{N}, arr::AbstractArray{T, N},
-        shift::CartesianIndex{N}) where {T, N}
-    pairedindices(ih, axes(arr), shift)
+function pairedindices(
+        ih::DefaultIndexHandler{N}, arr::AbstractArray{T, N},
+        shift::CartesianIndex{N}
+    ) where {T, N}
+    return pairedindices(ih, axes(arr), shift)
 end
 
-function pairedindices(ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
-        shift::CartesianIndex{N}) where {N, T <: Number}
-    pairedindices(ih, Base.OneTo.(dims), shift)
+function pairedindices(
+        ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
+        shift::CartesianIndex{N}
+    ) where {N, T <: Number}
+    return pairedindices(ih, Base.OneTo.(dims), shift)
 end
 
 # Important: the species in `shift` are ordered according to `Catalyst.species`!
-function pairedindices(ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
-        shift::CartesianIndex{N}) where {N, T <: AbstractVector}
-    ranges = tuple((UnitRange(max(first(ax), first(ax)+shift[ih.perm[i]]),
-                        min(last(ax), last(ax)+shift[ih.perm[i]]))
-    for (i, ax) in enumerate(dims))...)
+function pairedindices(
+        ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
+        shift::CartesianIndex{N}
+    ) where {N, T <: AbstractVector}
+    ranges = tuple(
+        (
+            UnitRange(
+                    max(first(ax), first(ax) + shift[ih.perm[i]]),
+                    min(last(ax), last(ax) + shift[ih.perm[i]])
+                )
+                for (i, ax) in enumerate(dims)
+        )...
+    )
 
     ranges_shifted = tuple((rng .- shift[ih.perm[i]] for (i, rng) in enumerate(ranges))...)
 
-    zip(CartesianIndices(ranges_shifted), CartesianIndices(ranges))
+    return zip(CartesianIndices(ranges_shifted), CartesianIndices(ranges))
 end
 
-function pairedindices(::DefaultIndexHandler, dims::NTuple{N, T},
-        shift::CartesianIndex{M}) where {N, M, T <: AbstractVector}
-    @error "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
+function pairedindices(
+        ::DefaultIndexHandler, dims::NTuple{N, T},
+        shift::CartesianIndex{M}
+    ) where {N, M, T <: AbstractVector}
+    return @error "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
 end
 
 """
@@ -118,7 +132,7 @@ function getsubstitutions(ih::DefaultIndexHandler, rs::ReactionSystem; state_sym
     species_orig = species(rs)
     species_perm = [species_orig[ih.perm[i]] for i in 1:nspecs]
 
-    Dict(symbol => state_sym_vec[i] - ih.offset for (i, symbol) in enumerate(species_perm))
+    return Dict(symbol => state_sym_vec[i] - ih.offset for (i, symbol) in enumerate(species_perm))
 end
 
 #"""
@@ -128,7 +142,7 @@ end
 #defined by the vector `order`.
 #"""
 function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector{Symbol})
-    PermutingIndexHandler(rs, map(sym -> Catalyst._symbol_to_var(rs, sym), order))
+    return PermutingIndexHandler(rs, map(sym -> Catalyst._symbol_to_var(rs, sym), order))
 end
 
 function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector)
@@ -158,5 +172,5 @@ function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector)
 
     @assert count == ones(Int, nspec)
 
-    DefaultIndexHandler(1, Tuple(perm))
+    return DefaultIndexHandler(1, Tuple(perm))
 end

@@ -38,7 +38,7 @@ function create_sparsematrix(sys::FSPSystem, dims::NTuple, ps, t)
         end
     end
 
-    sparse(I, J, V)
+    return sparse(I, J, V)
 end
 
 function create_sparsematrix_ss(sys::FSPSystem, dims::NTuple, ps)
@@ -72,7 +72,7 @@ function create_sparsematrix_ss(sys::FSPSystem, dims::NTuple, ps)
         end
     end
 
-    sparse(I, J, V)
+    return sparse(I, J, V)
 end
 
 """
@@ -84,7 +84,7 @@ Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP a
 of the state obtained using `vec`.
 """
 function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, t::Real)
-    create_sparsematrix(sys, dims, pmap_to_p(sys, pmap), t)
+    return create_sparsematrix(sys, dims, pmap_to_p(sys, pmap), t)
 end
 
 """
@@ -94,5 +94,5 @@ Convert the reaction system into a sparse matrix defining the right-hand side of
 Chemical Master Equation, steady-state version.
 """
 function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, ::SteadyState)
-    create_sparsematrix_ss(sys, dims, pmap_to_p(sys, pmap))
+    return create_sparsematrix_ss(sys, dims, pmap_to_p(sys, pmap))
 end
