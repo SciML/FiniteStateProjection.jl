@@ -27,4 +27,4 @@ This function is generated dynamically as an `ODEFunction` for use with Differen
 
 ## Acknowledgments
 
-Special thanks to [Xiamong Fu](https://github.com/palmtree2013), [Brian Munsky](https://www.engr.colostate.edu/%7Emunsky/) and [Huy Vo](https://github.com/voduchuy) for their examples and suggestions and for contributing most of the content in the [Tips & Tricks](@ref tips) page!
+Special thanks to [Xiaoming Fu](https://github.com/palmtree2013), [Brian Munsky](https://www.engr.colostate.edu/%7Emunsky/) and [Huy Vo](https://github.com/voduchuy) for their examples and suggestions and for contributing most of the content in the [Tips & Tricks](@ref tips) page!

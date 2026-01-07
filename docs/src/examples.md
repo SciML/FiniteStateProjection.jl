@@ -16,7 +16,7 @@ end
 sys = FSPSystem(rn)
 
 # Parameters for our system
-ps = [10.0, 1.0]
+ps = [:σ => 10.0, :d => 1.0]
 
 # Initial distribution (over 1 species)
 # Here we start with 0 copies of A
@@ -33,7 +33,7 @@ sol = solve(prob, Vern7())
 
 Here we showcase the telegraph model, a simplistic description of mRNA transcription in biological cells. We have one gene that transitions stochastically between an *on* and an *off* state and produces mRNA molecules while it is in the *on* state.
 
-The most straightforward description of this system includes three species: two gene states, `G_on` and `G_off`, and mRNA `M`. The state space for this system is 3-dimensional. We know, however, that `G_on` and `G_off` never occur at the same time, indeed the conservation law `[G_on] + [G_off] = 1` allows us to express the state of the system in terms of `G_on` and `M` only. The state space of this reduced system is 2-dimensional.If we use an mRNA cutoff of 100, the state space for the original model has size ``2 \times 2 \times 100 = 400``, while the reduced state space has size ``2 \times 100 = 200``, a two-fold saving. Since the FSP get computationally more expensive for each species in a system, eliminating redundant species as above is recommended for improved performance.
+The most straightforward description of this system includes three species: two gene states, `G_on` and `G_off`, and mRNA `M`. The state space for this system is 3-dimensional. We know, however, that `G_on` and `G_off` never occur at the same time, indeed the conservation law `[G_on] + [G_off] = 1` allows us to express the state of the system in terms of `G_on` and `M` only. The state space of this reduced system is 2-dimensional. If we use an mRNA cutoff of 100, the state space for the original model has size ``2 \times 2 \times 100 = 400``, while the reduced state space has size ``2 \times 100 = 200``, a two-fold saving. Since the FSP gets computationally more expensive for each species in a system, eliminating redundant species as above is recommended for improved performance.
 
 !!! note
     
@@ -53,7 +53,7 @@ end
 sys = FSPSystem(rn)
 
 # Parameters for our system
-ps = [0.25, 0.15, 15.0, 1.0]
+ps = [:σ_on => 0.25, :σ_off => 0.15, :ρ => 15.0, :d => 1.0]
 
 # Initial distribution (over two species)
 # Here we start with 0 copies of G_on and M
