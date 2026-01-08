@@ -4,7 +4,7 @@ Solving the Chemical Master Equation numerically is a difficult task and errors 
 
 ## Ensure your state space has the right dimension
 
-If your are solving an SIR model with three species, ``S``, ``I`` and ``R``, your state space will be 3-dimensional. FiniteStateProjection.jl computes probabilities for all states simultaneously and stores the results in a 3-dimensional array. In particular, `u0` must have type `Float64` or similar as it represents numbers between 0 and 1.
+If you are solving an SIR model with three species, ``S``, ``I`` and ``R``, your state space will be 3-dimensional. FiniteStateProjection.jl computes probabilities for all states simultaneously and stores the results in a 3-dimensional array. In particular, `u0` must have type `Float64` or similar as it represents numbers between 0 and 1.
 
 ```julia
 # correct
@@ -47,7 +47,7 @@ end
 sys_fsp = FSPSystem(rn)
 ```
 
-Here the propensity function for the first reaction will negative if ``I > N``, so the following may result in numerical instabilities:
+Here the propensity function for the first reaction will be negative if ``I > N``, so the following may result in numerical instabilities:
 
 ```julia
 u0 = zeros(30)

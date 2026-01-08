@@ -1,6 +1,6 @@
 # [Tips and Tricks](@id tips)
 
-The FSP approximates an infinite-dimensional system of equations by truncating it to a finite number of variables. The accuracy of the FSP therefore depends on how many variables are retained, ie.~what portion of the state space is modelled. While simple reaction networks with 1 or 2 species are not too difficult to handle using the FSP, a naive approach will require unfeasibly large truncations for systems of even moderate complexity.
+The FSP approximates an infinite-dimensional system of equations by truncating it to a finite number of variables. The accuracy of the FSP therefore depends on how many variables are retained, i.e., what portion of the state space is modelled. While simple reaction networks with 1 or 2 species are not too difficult to handle using the FSP, a naive approach will require unfeasibly large truncations for systems of even moderate complexity.
 
 ## Solving Linear Equations
 
@@ -33,4 +33,4 @@ expmv!(vec(ut), t, A, vec(u0), tol=1e-6)  # really fast
 
 ## Further Comments
 
-Choosing the right solver for large systems of ODEs can result in time savings on the order of 10-100x, and it is recommended that you experiment with a few solvers to see which works best in your case. This section is still work in progress and there has been a lot of research on accelerating the FSP and extending it to larger reaction networks which will hopefully be reviewed here soon. Feel free to share any comments or suggestions in this direction at the [Github repository](https://github.com/kaandocal/FiniteStateProjection.jl)!
+Choosing the right solver for large systems of ODEs can result in time savings on the order of 10-100x, and it is recommended that you experiment with a few solvers to see which works best in your case. This section is still work in progress and there has been a lot of research on accelerating the FSP and extending it to larger reaction networks which will hopefully be reviewed here soon. Feel free to share any comments or suggestions in this direction at the [Github repository](https://github.com/SciML/FiniteStateProjection.jl)!
