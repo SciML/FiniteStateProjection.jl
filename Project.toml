@@ -12,8 +12,8 @@ RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
-Catalyst = "15"
-DiffEqBase = "6"
+Catalyst = "15, 16.1"
+DiffEqBase = "6, 7.1"
 MacroTools = "^0.5.5"
 Reexport = "1"
 RuntimeGeneratedFunctions = "0.5"
