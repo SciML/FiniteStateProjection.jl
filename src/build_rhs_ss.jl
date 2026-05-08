@@ -43,7 +43,7 @@ function build_rhs_ex_ss(sys::FSPSystem; striplines::Bool = false)
 
     striplines && (ex = MacroTools.striplines(ex))
 
-    ex = ex |> MacroTools.flatten |> MacroTools.prettify
+    ex = ex |> MacroTools.flatten |> _prettify
 
     return ex
 end
