@@ -28,5 +28,4 @@ jobs:
     with:
       group: ${{ matrix.group }}
       julia-version: "lts"
-      skip: "Pkg,TOML"
     secrets: "inherit"
