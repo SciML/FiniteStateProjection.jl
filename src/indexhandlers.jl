@@ -86,16 +86,28 @@ function pairedindices(
     return pairedindices(ih, axes(arr), shift)
 end
 
+# `dims` is written as `Tuple{T, Vararg{T}}` rather than `NTuple{N, T}` so that the
+# element type `T` is always bound: `NTuple{0, T} === Tuple{}` leaves `T` free, which
+# trips Aqua's unbound-type-parameter check. The zero-dimensional case is handled by the
+# explicit method below.
 function pairedindices(
-        ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
+        ih::DefaultIndexHandler{N}, dims::Tuple{T, Vararg{T}},
         shift::CartesianIndex{N}
     ) where {N, T <: Number}
     return pairedindices(ih, Base.OneTo.(dims), shift)
 end
 
+# Handles the degenerate zero-dimensional case (no species), where neither `T`-constrained
+# method below matches because `Tuple{}` has no element type.
+function pairedindices(
+        ::DefaultIndexHandler{0}, ::Tuple{}, ::CartesianIndex{0}
+    )
+    return zip(CartesianIndices(()), CartesianIndices(()))
+end
+
 # Important: the species in `shift` are ordered according to `Catalyst.species`!
 function pairedindices(
-        ih::DefaultIndexHandler{N}, dims::NTuple{N, T},
+        ih::DefaultIndexHandler{N}, dims::Tuple{T, Vararg{T}},
         shift::CartesianIndex{N}
     ) where {N, T <: AbstractVector}
     ranges = tuple(
@@ -114,9 +126,9 @@ function pairedindices(
 end
 
 function pairedindices(
-        ::DefaultIndexHandler, dims::NTuple{N, T},
-        shift::CartesianIndex{M}
-    ) where {N, M, T <: AbstractVector}
+        ::DefaultIndexHandler, dims::Tuple,
+        shift::CartesianIndex
+    )
     return @error "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
 end
 
