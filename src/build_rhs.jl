@@ -140,6 +140,6 @@ Return an `ODEProblem` for use in `DifferentialEquations`. This function implici
 calls `convert(ODEFunction, sys)`. It is usually more efficient to create an `ODEFunction`
 first and then use that to create `ODEProblem`s.
 """
-function DiffEqBase.ODEProblem(sys::FSPSystem, u0, tint, pmap = NullParameters())
+function SciMLBase.ODEProblem(sys::FSPSystem, u0, tint, pmap = SciMLBase.NullParameters())
     return ODEProblem(convert(ODEFunction, sys), u0, tint, pmap_to_p(sys, pmap))
 end

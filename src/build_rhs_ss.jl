@@ -75,6 +75,6 @@ end
 
 Return a `SteadyStateProblem` for use in `DifferentialEquations.
 """
-function DiffEqBase.SteadyStateProblem(sys::FSPSystem, u0, pmap = NullParameters())
+function SciMLBase.SteadyStateProblem(sys::FSPSystem, u0, pmap = SciMLBase.NullParameters())
     return SteadyStateProblem(convert(ODEFunction, sys, SteadyState()), u0, pmap_to_p(sys, pmap))
 end

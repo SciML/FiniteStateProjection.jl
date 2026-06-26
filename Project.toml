@@ -13,7 +13,7 @@ SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [compat]
 Catalyst = "15"
-DiffEqBase = "6, 7"
+DiffEqBase = "6.165, 7"
 Distributions = "0.25"
 LinearAlgebra = "1"
 MacroTools = "^0.5.5"
