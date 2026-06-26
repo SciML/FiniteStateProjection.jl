@@ -24,11 +24,14 @@ run_qa(
                 :value,        # owner Symbolics, accessed via ModelingToolkit
             ),
         ),
-        # Non-public names qualified from other packages (go public as those
-        # packages release public/`@public` declarations).
+        # Non-public names qualified from other packages. The SciMLBase/ModelingToolkit/
+        # Symbolics public-API releases are held back here by `Catalyst = "15"` (which
+        # pins the SciMLBase 2.x / ModelingToolkit 9.x / Symbolics 6.x ecosystem), so the
+        # symbolic-stack names are still non-public in the resolved versions; MacroTools
+        # and Catalyst have not made these public. Drop each as its owner releases a
+        # public declaration that FiniteStateProjection can actually resolve.
         all_qualified_accesses_are_public = (;
             ignore = (
-                :OneTo,            # Base
                 :_symbol_to_var,   # Catalyst
                 :get_systems,      # Catalyst
                 :alias_gensyms,    # MacroTools
@@ -36,7 +39,6 @@ run_qa(
                 :prewalk,          # MacroTools
                 :resyntax,         # MacroTools
                 :striplines,       # MacroTools
-                :init,             # RuntimeGeneratedFunctions
                 :scalarize,        # ModelingToolkit (owner Symbolics)
                 :value,            # ModelingToolkit (owner Symbolics)
                 :varmap_to_vars,   # ModelingToolkit
