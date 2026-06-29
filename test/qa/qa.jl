@@ -43,6 +43,7 @@ run_qa(
                 :scalarize,        # ModelingToolkit (owner Symbolics; still non-public)
                 :value,            # ModelingToolkit (owner Symbolics; still non-public)
                 :varmap_to_vars,   # ModelingToolkit (non-public)
+                :NullParameters,   # SciMLBase (public in 3.30+, but Catalyst 15 pins 2.153.1 where it is not)
             ),
         ),
     ),
