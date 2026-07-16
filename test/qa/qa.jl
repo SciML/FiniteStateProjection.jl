@@ -51,10 +51,12 @@ run_qa(
         ),
     ),
     api_docs_kwargs = (;
+        rendered = true,
         # `@reexport using Catalyst` intentionally exposes Catalyst's symbolic
         # stack. Require docstrings for FiniteStateProjection-owned public API
         # here, and leave dependency API docs to their owner packages.
         ignore = API_DOCS_IGNORE,
+        rendered_ignore = API_DOCS_IGNORE,
     ),
     # Heavy `@reexport using Catalyst` plus the symbolic stack make ~23 names
     # implicit; making them all explicit is a risky mass refactor. Tracked in #60.
