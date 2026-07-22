@@ -40,7 +40,7 @@ function build_rhs_singlepass_ss(sys::FSPSystem)
         ex = quote
             for (idx_in, idx_out) in
                 pairedindices($(sys.ih), u, $(CartesianIndex(S[:, i]...)))
-                rate = u[idx_in] * $(rf.body)
+                rate = u[idx_in] * $(rf.expression)
                 du[idx_in] -= rate
                 du[idx_out] += rate
             end

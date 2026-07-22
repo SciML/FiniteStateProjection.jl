@@ -28,6 +28,13 @@ struct FSPSystem{IHT <: AbstractIndexHandler, RT}
     rfs::RT
 end
 
+struct RateFunction{F, E}
+    callable::F
+    expression::E
+end
+
+@inline (rf::RateFunction)(args...) = rf.callable(args...)
+
 function FSPSystem(
         rs::ReactionSystem,
         ih::AbstractIndexHandler = DefaultIndexHandler{length(species(rs))}();
@@ -58,36 +65,43 @@ function build_ratefuncs(
         rs::ReactionSystem, ih::AbstractIndexHandler;
         state_sym::Symbol, combinatoric_ratelaw::Bool = true
     )
+    nspecs = numspecies(rs)
+    state = (@variables ($state_sym)[1:nspecs])[1]
+    @variables t
+    params = parameters(rs)
     substitutions = getsubstitutions(ih, rs, state_sym = state_sym)
 
     return map(reactions(rs)) do reac
         jrl = jumpratelaw(reac; combinatoric_ratelaw)
-        jrl_s = substitute(jrl, substitutions)
-        toexpr(jrl_s)
+        rate = substitute(jrl, substitutions)
+        ex = build_function(rate, state, t, params...; expression = Val{true})
+        ex isa Expr && ex.head === :function && length(ex.args) == 2 ||
+            throw(ArgumentError("Symbolics.build_function returned an unsupported expression"))
+        ex.args[2]
     end
 end
 
 function create_ratefuncs(rs::ReactionSystem, ih::AbstractIndexHandler; combinatoric_ratelaw::Bool = true)
-    paramsyms = Symbol.(parameters(rs))
+    params = getname.(parameters(rs))
 
     return tuple(
         map(
-            ex -> compile_ratefunc(ex, paramsyms),
+            rate -> compile_ratefunc(rate, params),
             build_ratefuncs(rs, ih; state_sym = :idx_in, combinatoric_ratelaw)
         )...
     )
 end
 
-function compile_ratefunc(ex_rf, params)
-    ex = _flatten(:((idx_in, t, $(params...)) -> $(ex_rf)))
-    return @RuntimeGeneratedFunction(ex)
+function compile_ratefunc(rate, params)
+    ex = _flatten(:((idx_in, t, $(params...)) -> $(rate)))
+    return RateFunction(@RuntimeGeneratedFunction(ex), rate)
 end
 
 _parameter_symbol(key::Symbol) = key
-_parameter_symbol(key) = Symbol(value(key))
+_parameter_symbol(key) = getname(key)
 
 function pmap_to_p(sys::FSPSystem, pmap)
     pmap isa SciMLBase.NullParameters && return pmap
     values_by_parameter = Dict(_parameter_symbol(k) => v for (k, v) in pmap)
-    return [values_by_parameter[p] for p in Symbol.(parameters(sys.rs))]
+    return [values_by_parameter[p] for p in getname.(parameters(sys.rs))]
 end

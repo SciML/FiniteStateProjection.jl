@@ -9,7 +9,7 @@ the variable `psym` represents an `AbstractVector`.
 See also: [`build_rhs_header`](@ref), [`build_rhs`](@ref)
 """
 function unpackparams(sys::FSPSystem, psym::Symbol)
-    param_names = Expr(:tuple, map(par -> par.name, parameters(sys.rs))...)
+    param_names = Expr(:tuple, getname.(parameters(sys.rs))...)
 
     return quote
         $(param_names) = $(psym)
@@ -47,8 +47,8 @@ See also: [`build_rhs`](@ref)
 function build_rhs_firstpass(sys::FSPSystem)
     isempty(sys.rfs) && return quote end
 
-    first_line = :(du[idx_in] = -u[idx_in] * $(sys.rfs[1].body))
-    other_lines = (:(du[idx_in] -= u[idx_in] * $(rf.body)) for rf in sys.rfs[2:end])
+    first_line = :(du[idx_in] = -u[idx_in] * $(sys.rfs[1].expression))
+    other_lines = (:(du[idx_in] -= u[idx_in] * $(rf.expression)) for rf in sys.rfs[2:end])
 
     return quote
         for idx_in in singleindices($(sys.ih), u)
@@ -81,7 +81,7 @@ function build_rhs_secondpass(sys::FSPSystem)
         ex = quote
             for (idx_in, idx_out) in
                 pairedindices($(sys.ih), u, $(CartesianIndex(S[:, i]...)))
-                du[idx_out] += u[idx_in] * $(rf.body)
+                du[idx_out] += u[idx_in] * $(rf.expression)
             end
         end
 

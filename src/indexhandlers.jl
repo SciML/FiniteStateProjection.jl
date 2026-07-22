@@ -151,7 +151,8 @@ Defines the abundance of species ``S_i`` to be `state_sym[i] - offset`.
 """
 function getsubstitutions(ih::DefaultIndexHandler, rs::ReactionSystem; state_sym::Symbol)
     nspecs = numspecies(rs)
-    state_sym_vec = value.(scalarize((@variables ($state_sym)[1:nspecs])[1]))
+    state_array = (@variables ($state_sym)[1:nspecs])[1]
+    state_sym_vec = [state_array[i] for i in 1:nspecs]
 
     species_orig = species(rs)
     species_perm = [species_orig[ih.perm[i]] for i in 1:nspecs]
