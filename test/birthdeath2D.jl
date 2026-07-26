@@ -22,13 +22,11 @@ end
 
 sys = FSPSystem(rs)
 
-prs = exp.(2 .* rand(2))
-
 pmap = [
-    :r1 => prs[1],
-    :r2 => prs[1] / exp(2 * rand()),
-    :s1 => prs[2],
-    :s2 => prs[2] / exp(2 * rand()),
+    :r1 => 2.0,
+    :r2 => 1.3,
+    :s1 => 1.7,
+    :s2 => 0.8,
 ]
 
 ps = last.(pmap)
