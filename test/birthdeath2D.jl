@@ -6,9 +6,12 @@ using FiniteStateProjection
 using Catalyst
 using SparseArrays
 using LinearAlgebra
+using Random
 using Sundials
 
 marg(vec; dims) = dropdims(sum(vec; dims); dims)
+
+Random.seed!(1234)
 
 rs = @reaction_network begin
     r1, 0 --> A
