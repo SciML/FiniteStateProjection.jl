@@ -6,7 +6,7 @@ CurrentModule = FiniteStateProjection
 
 ## [Index Handlers](@id index_handlers_internal)
 
-### Index Handler Interface
+### Index Handler Implementations
 
 User-defined index handlers should inherit from `AbstractIndexHandler` and implement the following methods:
 
@@ -19,14 +19,6 @@ For matrix conversions they should additionally implement:
 
   - [`LinearIndices`](@ref Base.LinearIndices)
   - [`vec`](@ref Base.vec)
-
-```@docs
-singleindices
-pairedindices
-getsubstitutions
-build_rhs_header
-LinearIndices
-```
 
 ### Built-in implementations
 

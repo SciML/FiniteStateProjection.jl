@@ -78,10 +78,17 @@ end
 """
     SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, ps, t::Real)
 
-Convert the reaction system into a sparse matrix defining the right-hand side of the
-Chemical Master Equation. `dims` is a tuple denoting the dimensions of the FSP and
-`ps` is the tuple of parameters. The sparse matrix works on the flattened version
-of the state obtained using `vec`.
+Converts an FSP system into a sparse matrix defining the time-dependent Chemical
+Master Equation.
+
+# Arguments
+- `sys`: FSP system to convert.
+- `dims`: Dimensions of the truncated FSP state array.
+- `pmap`: Iterable of parameter-value pairs, or `SciMLBase.NullParameters()`.
+- `t`: Time at which to evaluate a time-dependent rate law.
+
+# Returns
+- A sparse matrix acting on the state vector produced by [`vec`](@ref Base.vec).
 """
 function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, t::Real)
     return create_sparsematrix(sys, dims, pmap_to_p(sys, pmap), t)
@@ -90,8 +97,18 @@ end
 """
     SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, ps, ::SteadyState)
 
-Convert the reaction system into a sparse matrix defining the right-hand side of the
-Chemical Master Equation, steady-state version.
+Converts an FSP system into the sparse matrix for its steady-state Chemical Master
+Equation formulation.
+
+# Arguments
+- `sys`: FSP system to convert.
+- `dims`: Dimensions of the truncated FSP state array.
+- `pmap`: Iterable of parameter-value pairs, or `SciMLBase.NullParameters()`.
+- `SteadyState()`: Dispatch marker selecting the formulation that drops transitions
+  leaving the truncated state space.
+
+# Returns
+- A sparse matrix acting on the state vector produced by [`vec`](@ref Base.vec).
 """
 function SparseArrays.SparseMatrixCSC(sys::FSPSystem, dims::NTuple, pmap, ::SteadyState)
     return create_sparsematrix_ss(sys, dims, pmap_to_p(sys, pmap))

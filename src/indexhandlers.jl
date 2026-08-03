@@ -1,8 +1,19 @@
 """
     singleindices(idxhandler::AbstractIndexHandler, arr)
 
-Returns all indices `I` in `arr`. Defaults to CartesianIndices, but can
-be overloaded for arbitrary index handlers.
+Returns the indices of the finite state space represented by `arr`.
+
+# Arguments
+- `idxhandler`: The index handler that defines the state-space layout.
+- `arr`: Either the state array or its tuple of dimensions.
+
+# Returns
+- An iterator of Cartesian indices. The default implementation returns
+  `CartesianIndices(arr)`.
+
+# Extension Rules
+Custom index handlers must import and extend this function. Implement both the
+state-array and dimension-tuple forms when supporting matrix conversions.
 """
 singleindices(::AbstractIndexHandler, arr::AbstractArray) = CartesianIndices(arr)
 singleindices(::AbstractIndexHandler, arr::Tuple) = CartesianIndices(arr)
@@ -10,23 +21,59 @@ singleindices(::AbstractIndexHandler, arr::Tuple) = CartesianIndices(arr)
 """
     pairedindices(idxhandler::AbstractIndexHandler, arr, shift::CartesianIndex)
 
-Returns all pairs of indices `(I .- shift, I)` in `arr`.
+Returns pairs `(I .- shift, I)` for state transitions that remain within `arr`.
+
+# Arguments
+- `idxhandler`: The index handler that defines the state-space layout.
+- `arr`: Either the state array or its tuple of dimensions.
+- `shift`: The reaction stoichiometry as a Cartesian index in Catalyst species order.
+
+# Returns
+- An iterator of source and destination Cartesian-index pairs.
+
+# Extension Rules
+Custom index handlers must import and extend this function. Implement both the
+state-array and dimension-tuple forms when supporting matrix conversions.
 """
 function pairedindices end
 
 """
     getsubstitutions(idxhandler::AbstractIndexHandler, rs::ReactionSystem; state_sym::Symbol)
 
-Returns a dict of the form `S_i => f_i(state_sym)`, where each `f_i` is an expression
-for the abundance of species `S_i` in terms of the state variable `state_sym`.
+Returns a dictionary `S_i => f_i(state_sym)`, where each `f_i` computes a species
+abundance from the symbolic state variable.
+
+# Arguments
+- `idxhandler`: The index handler that defines the state-space layout.
+- `rs`: Catalyst reaction system whose species require substitutions.
+
+# Keyword Arguments
+- `state_sym`: Symbol naming the generated RHS state variable.
+
+# Returns
+- A dictionary mapping each Catalyst species to a symbolic abundance expression.
+
+# Extension Rules
+Custom index handlers must import and extend this function.
 """
 function getsubstitutions end
 
 """
     vec(idxhandler::AbstractIndexHandler, arr)
 
-Converts the right-hand side defining the solution of the CME into a
-one-dimensional vector to which a matrix can be applied.
+Converts the CME state array into the vector ordering used by sparse-matrix
+representations.
+
+# Arguments
+- `idxhandler`: The index handler that defines the vector ordering.
+- `arr`: State array to flatten.
+
+# Returns
+- A one-dimensional state vector compatible with [`LinearIndices`](@ref Base.LinearIndices).
+
+# Extension Rules
+Custom index handlers that support matrix conversions must import and extend this
+`Base` function.
 
 See also: [`LinearIndices`](@ref Base.LinearIndices)
 """
@@ -35,13 +82,24 @@ function vec end
 """
     LinearIndices(idxhandler::AbstractIndexHandler, arr)
 
-Returns an object `lind` which converts indices returned from [`singleindices`](@ref)
-and [`pairedindices`](@ref) to linear indices compatible with [`vec`](@ref Base.vec)
-via `lind[idx_cart] = idx_lin`. The indices are related via
+Returns an object `lind` converting the Cartesian indices produced by
+[`singleindices`](@ref) and [`pairedindices`](@ref) to the linear indices of
+[`vec`](@ref Base.vec). The required invariant is
 
 ```julia
 arr[idx_cart] == vec(idxhandler, arr)[idx_lin]
 ```
+
+# Arguments
+- `idxhandler`: The index handler that defines the vector ordering.
+- `arr`: Either the state array or its tuple of dimensions.
+
+# Returns
+- An indexable object mapping Cartesian indices to vector positions.
+
+# Extension Rules
+Custom index handlers that support matrix conversions must import and extend this
+`Base` function, preserving the documented indexing invariant.
 
 See also: [`vec`](@ref Base.vec)
 """
@@ -53,9 +111,14 @@ function LinearIndices end
     DefaultIndexHandler{N}()
     DefaultIndexHandler{N}(offset, perm)
 
-Default index handler for an FSP system with `N` species. It represents the state
-as an `N`-dimensional array, maps a molecule count of zero to `offset`, and uses
-`perm` to map state-array dimensions to Catalyst's species order.
+Default index handler for an FSP system with `N` species.
+
+# Fields
+- `offset`: Julia index corresponding to a molecular count of zero.
+- `perm`: Mapping from state-array dimensions to Catalyst species order.
+
+It represents the state as an `N`-dimensional array, maps a molecule count of zero to
+`offset`, and uses `perm` to map state-array dimensions to Catalyst's species order.
 
 The zero-argument constructor uses Julia's one-based indexing and preserves the
 species order. This representation is appropriate when every state in the truncated
@@ -77,7 +140,15 @@ DefaultIndexHandler{N}() where {N} = DefaultIndexHandler{N}(1, Tuple(1:N))
 """
     NaiveIndexHandler
 
-Deprecated alias for [`DefaultIndexHandler`](@ref). Use `DefaultIndexHandler` instead.
+Deprecated constructor forwarding to [`DefaultIndexHandler`](@ref).
+
+# Arguments
+- `args...`: Positional arguments accepted by `DefaultIndexHandler`.
+
+# Keyword Arguments
+- `kwargs...`: Keyword arguments accepted by `DefaultIndexHandler`.
+
+Use `DefaultIndexHandler` directly instead.
 """
 function NaiveIndexHandler(args...; kwargs...)
     Base.depwarn(
@@ -86,7 +157,6 @@ function NaiveIndexHandler(args...; kwargs...)
     )
     return DefaultIndexHandler(args...; kwargs...)
 end
-export NaiveIndexHandler
 
 Base.vec(::DefaultIndexHandler, arr) = vec(arr)
 Base.LinearIndices(::DefaultIndexHandler, arr) = LinearIndices(arr)
