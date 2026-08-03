@@ -13,6 +13,10 @@ It is used as a dispatch tag by
 [`SparseArrays.SparseMatrixCSC(::FSPSystem, ::NTuple, ps, ::SteadyState)`](@ref)
 and [`SciMLBase.SteadyStateProblem(::FSPSystem, u0, p)`](@ref).
 
+# Usage
+Pass `SteadyState()` as the final argument to `SparseMatrixCSC`, or construct a
+`SteadyStateProblem` from an `FSPSystem`.
+
 # Examples
 ```julia
 julia > SteadyState()

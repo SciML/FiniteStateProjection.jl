@@ -5,10 +5,17 @@ Represent a Catalyst reaction system as a finite state projection (FSP) system.
 `FSPSystem` stores the reaction system, an index handler describing the state-array
 layout, and generated rate functions used to construct ODE and steady-state problems.
 
+# Fields
+- `rs`: Underlying Catalyst reaction system.
+- `ih`: Index handler defining the FSP state-array layout.
+- `rfs`: Generated reaction-rate functions in the index-handler representation.
+
 # Arguments
 - `rs`: Catalyst reaction system without subsystems.
 - `ih`: Index handler for the FSP state array. By default,
   `DefaultIndexHandler` uses Catalyst's species order.
+
+# Keyword Arguments
 - `combinatoric_ratelaw`: Whether to use combinatoric jump rate laws.
 
 # Examples

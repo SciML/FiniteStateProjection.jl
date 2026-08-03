@@ -19,9 +19,18 @@ end
 """
     build_rhs_header(sys::FSPSystem)
 
-Return initialisation code for the RHS function, unpacking the parameters
-`p` supplied by `DifferentialEquations`. The default implementation
-just unpacks parameters from `p`.
+Returns initialization code for the generated RHS function. The default implementation
+unpacks the vector parameter `p` supplied by DifferentialEquations.jl.
+
+# Arguments
+- `sys`: FSP system whose parameter ordering determines the generated code.
+
+# Returns
+- An expression evaluated at the start of the generated RHS function.
+
+# Extension Rules
+Custom index handlers with a different parameter representation may import and extend
+this function for their corresponding `FSPSystem` specialization.
 
 See also: [`unpackparams`](@ref), [`build_rhs`](@ref)
 """

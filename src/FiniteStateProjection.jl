@@ -17,7 +17,8 @@ import Base: LinearIndices, vec
 
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
-export FSPSystem, DefaultIndexHandler, SteadyState
+export AbstractIndexHandler, DefaultIndexHandler, FSPSystem, NaiveIndexHandler, SteadyState,
+    build_rhs_header, getsubstitutions, pairedindices, singleindices
 
 _unresolve1(x) = x
 _unresolve1(f::Function) = nameof(f)
@@ -54,6 +55,17 @@ function _prettify(ex; lines = false)
     return _unresolve(_flatten(ex))
 end
 
+"""
+    AbstractIndexHandler
+
+Abstract supertype for index handlers used by [`FSPSystem`](@ref).
+
+# Extension Rules
+To implement a custom handler, subtype `AbstractIndexHandler` and extend the
+documented index-handler interface described in the manual. Matrix-capable handlers
+must implement both forms of `singleindices` and `pairedindices`, `LinearIndices`, and
+`vec`; all handlers must implement `getsubstitutions`.
+"""
 abstract type AbstractIndexHandler end
 
 include("fspsystem.jl")
