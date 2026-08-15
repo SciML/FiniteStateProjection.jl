@@ -15,7 +15,7 @@ using TOML
     compat = project["compat"]
     @test compat["Catalyst"] == "16.2"
     @test compat["ModelingToolkitBase"] == "1.17"
-    @test compat["SciMLBase"] == "2.144, 3"
+    @test compat["SciMLBase"] == "3"
     @test compat["SymbolicIndexingInterface"] == "0.3.43"
     @test compat["Symbolics"] == "7.13"
     @test compat["SymbolicUtils"] == "4.18"
