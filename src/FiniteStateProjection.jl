@@ -2,7 +2,9 @@ module FiniteStateProjection
 
 using Catalyst: Reaction, ReactionSystem, jumpratelaw, netstoichmat, numspecies, reactions,
     species
+import Catalyst
 using ModelingToolkitBase: equations, get_systems, parameters
+using PrecompileTools: @compile_workload, @setup_workload
 import RuntimeGeneratedFunctions
 using RuntimeGeneratedFunctions: @RuntimeGeneratedFunction
 import SciMLBase
@@ -73,5 +75,16 @@ include("indexhandlers.jl")
 include("build_rhs.jl")
 include("build_rhs_ss.jl")
 include("matrix.jl")
+
+@setup_workload begin
+    @compile_workload begin
+        reaction_system = Catalyst.@reaction_network begin
+            birth, 0 --> A
+            death, A --> 0
+        end
+        system = FSPSystem(reaction_system)
+        SparseArrays.SparseMatrixCSC(system, (3,), [:birth => 1.0, :death => 0.5], 0)
+    end
+end
 
 end
