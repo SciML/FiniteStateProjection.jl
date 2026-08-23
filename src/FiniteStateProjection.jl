@@ -17,10 +17,36 @@ using SymbolicUtils: substitute
 
 import Base: LinearIndices, vec
 
+# ---------------------------------------------------------------------------
+# Reexported interface (see the second `export` block below).
+#
+# The documented entry point of this package is a Catalyst reaction network:
+#
+#     rn = @reaction_network begin
+#         σ, 0 --> A
+#         d, A --> 0
+#     end
+#     sys = FSPSystem(rn)
+#     prob = ODEProblem(sys, u0, (0, 10.0), ps)
+#
+# `@reaction_network` and the problem constructors reached the user through
+# `@reexport using Catalyst`, so `using FiniteStateProjection` was enough to write
+# that. The blanket reexport (441 names, most of them Catalyst's symbolic and
+# modelling stack) is gone; this is the subset that normal documented use needs,
+# each imported from the module that owns it and documented there.
+# ---------------------------------------------------------------------------
+using Catalyst: @reaction_network
+using CommonSolve: solve
+
 RuntimeGeneratedFunctions.init(@__MODULE__)
 
 export AbstractIndexHandler, DefaultIndexHandler, FSPSystem, NaiveIndexHandler, SteadyState,
     build_rhs_header, getsubstitutions, pairedindices, singleindices
+
+# Reexported model-definition and problem interface; approved via `reexports_allow`
+# in test/qa/qa.jl and documented in docs/src/mainapi.md.
+export @reaction_network, ReactionSystem, numspecies, reactions, species
+export ODEFunction, ODEProblem, SteadyStateProblem, solve
 
 _unresolve1(x) = x
 _unresolve1(f::Function) = nameof(f)
