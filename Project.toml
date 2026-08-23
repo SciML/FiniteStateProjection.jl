@@ -5,6 +5,7 @@ version = "0.4.2"
 
 [deps]
 Catalyst = "479239e8-5488-4da2-87a7-35f2df7eef83"
+CommonSolve = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
 ModelingToolkitBase = "7771a370-6774-4173-bd38-47e70ca0b839"
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 RuntimeGeneratedFunctions = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
@@ -16,6 +17,7 @@ SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 
 [compat]
 Catalyst = "16.2"
+CommonSolve = "0.2.4"
 Distributions = "0.25"
 LinearAlgebra = "1"
 ModelingToolkitBase = "1.17"
