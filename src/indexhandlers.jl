@@ -195,9 +195,9 @@ function pairedindices(
     ranges = tuple(
         (
             UnitRange(
-                    max(first(ax), first(ax) + shift[ih.perm[i]]),
-                    min(last(ax), last(ax) + shift[ih.perm[i]])
-                )
+                max(first(ax), first(ax) + shift[ih.perm[i]]),
+                min(last(ax), last(ax) + shift[ih.perm[i]])
+            )
                 for (i, ax) in enumerate(dims)
         )...
     )
