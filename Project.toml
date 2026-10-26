@@ -16,7 +16,7 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 
 [compat]
-Catalyst = "16.2"
+Catalyst = "16.2, 17"
 CommonSolve = "0.2.4"
 Distributions = "0.25"
 LinearAlgebra = "1"
