@@ -176,6 +176,11 @@ function pairedindices(
         ih::DefaultIndexHandler{N}, dims::Tuple{T, Vararg{T}},
         shift::CartesianIndex{N}
     ) where {N, T <: Number}
+    length(dims) == N || throw(
+        DimensionMismatch(
+            "Dimension of state space ($(length(dims))) does not match number of species ($N)"
+        )
+    )
     return pairedindices(ih, Base.OneTo.(dims), shift)
 end
 
@@ -192,6 +197,11 @@ function pairedindices(
         ih::DefaultIndexHandler{N}, dims::Tuple{T, Vararg{T}},
         shift::CartesianIndex{N}
     ) where {N, T <: AbstractVector}
+    length(dims) == N || throw(
+        DimensionMismatch(
+            "Dimension of state space ($(length(dims))) does not match number of species ($N)"
+        )
+    )
     ranges = tuple(
         (
             UnitRange(
