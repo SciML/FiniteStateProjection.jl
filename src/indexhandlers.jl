@@ -211,7 +211,11 @@ function pairedindices(
         ::DefaultIndexHandler, dims::Tuple,
         shift::CartesianIndex
     )
-    return @error "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
+    throw(
+        DimensionMismatch(
+            "Dimension of state space ($(length(dims))) does not match number of species ($(length(shift)))"
+        )
+    )
 end
 
 """
@@ -251,7 +255,11 @@ function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector)
     nspec = length(spec)
 
     if nspec != length(order)
-        @error "Length of species vector ($(length(order))) does not match number of species ($nspec)"
+        throw(
+            DimensionMismatch(
+                "Length of species vector ($(length(order))) does not match number of species ($nspec)"
+            )
+        )
     end
 
     perm = zeros(Int, nspec)
@@ -259,13 +267,11 @@ function PermutingIndexHandler(rs::ReactionSystem, order::AbstractVector)
 
     for i in 1:nspec
         idx = findfirst(s -> isequal(s, order[i]), spec)
-        if isnothing(idx)
-            @error "Cannot find species $(order[i]) in reaction system"
-        end
+        isnothing(idx) &&
+            throw(ArgumentError("Cannot find species $(order[i]) in reaction system"))
 
-        if count[idx] > 0
-            @error "Species $(order[i]) specified twice in ordering"
-        end
+        count[idx] > 0 &&
+            throw(ArgumentError("Species $(order[i]) specified twice in ordering"))
 
         count[idx] += 1
         perm[i] = idx
