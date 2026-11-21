@@ -1,6 +1,7 @@
 using Test
 using Catalyst: @reaction_network
-using FiniteStateProjection: AbstractIndexHandler, DefaultIndexHandler, FSPSystem
+using FiniteStateProjection: AbstractIndexHandler, DefaultIndexHandler, FSPSystem,
+    PermutingIndexHandler
 import FiniteStateProjection:
     build_rhs_header, getsubstitutions, pairedindices, singleindices
 using SciMLBase: ODEProblem
@@ -52,4 +53,35 @@ end
     default_problem.f(default_du, u0, default_problem.p, 0.0)
     custom_problem.f(custom_du, u0, custom_problem.p, 0.0)
     @test custom_du == default_du
+end
+
+@testset "Index handler error handling" begin
+    rs = @reaction_network begin
+        k1, 0 --> A
+        k2, A --> 0
+        k3, 0 --> B
+    end
+
+    @testset "PermutingIndexHandler rejects a wrong number of species" begin
+        @test_throws DimensionMismatch PermutingIndexHandler(rs, [:A])
+    end
+
+    @testset "PermutingIndexHandler rejects an unknown species" begin
+        @test_throws ErrorException PermutingIndexHandler(rs, [:A, :C])
+    end
+
+    @testset "PermutingIndexHandler rejects a repeated species" begin
+        @test_throws ArgumentError PermutingIndexHandler(rs, [:A, :A])
+    end
+
+    @testset "pairedindices rejects a dimension tuple of the wrong length" begin
+        ih = DefaultIndexHandler{2}()
+        @test_throws DimensionMismatch pairedindices(ih, (3,), CartesianIndex(1, 0))
+        @test_throws DimensionMismatch pairedindices(ih, (3, 3, 3), CartesianIndex(1, 0))
+    end
+
+    @testset "pairedindices accepts a dimension tuple of the right length" begin
+        ih = DefaultIndexHandler{2}()
+        @test length(collect(pairedindices(ih, (3, 3), CartesianIndex(1, 0)))) == 6
+    end
 end
